@@ -1,0 +1,164 @@
+/* Search and filter container styles */
+.search-filter-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 0.75rem;
+    border: 1px solid var(--gray-200);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Search bar styles */
+.search-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.search-bar:focus-within {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.25rem;
+    font-size: 0.9375rem;
+    color: var(--gray-900);
+}
+
+.search-input::placeholder {
+    color: var(--gray-500);
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+/* Filter toggle button styles */
+.filter-toggle {
+    min-width: 130px;
+    height: 100%;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+}
+
+.filter-toggle:hover {
+    background-color: var(--gray-200);
+    border-color: var(--gray-300);
+}
+
+/* Filters panel styles */
+.filters-panel {
+    background-color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--gray-200);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Filter group styles */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Filter input and select styles */
+.filter-input,
+.filter-select {
+    width: 80%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    color: var(--gray-900);
+    background-color: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.filter-input::placeholder {
+    color: var(--gray-400);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.filter-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+    padding-right: 2.5rem;
+}
+
+/* Clear filters button */
+.clear-filters {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    transition: all 0.15s ease;
+}
+
+.clear-filters:hover {
+    background-color: var(--gray-200);
+    border-color: var(--gray-300);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .search-filter-container {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    .filter-toggle {
+        width: 100%;
+    }
+
+    .filters-panel {
+        padding: 1.5rem;
+        grid-template-columns: 1fr;
+    }
+}

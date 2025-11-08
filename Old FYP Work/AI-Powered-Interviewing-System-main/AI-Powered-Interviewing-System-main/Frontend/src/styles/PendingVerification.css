@@ -1,0 +1,261 @@
+/* PendingVerification.css */
+.pv-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #F0F7FF, #EEF2FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.pv-card {
+  max-width: 48rem;
+  width: 100%;
+  background-color: white;
+  border-radius: 2rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 3rem;
+  position: relative;
+}
+
+.pv-decorative-circle {
+  position: absolute;
+  width: 12rem;
+  height: 12rem;
+  background-color: #F0F7FF;
+  border-radius: 50%;
+}
+
+.pv-top-circle {
+  top: 0;
+  right: 0;
+  margin-right: -6rem;
+  margin-top: -6rem;
+}
+
+.pv-bottom-circle {
+  bottom: 0;
+  left: 0;
+  margin-left: -6rem;
+  margin-bottom: -6rem;
+}
+
+.pv-main-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.pv-icon-container {
+  margin-bottom: 3rem;
+}
+
+.pv-main-icon {
+  width: 6rem;
+  height: 6rem;
+  background-color: #DBEAFE;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.pv-clock-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #2563EB;
+}
+
+.pv-mail-badge {
+  position: absolute;
+  right: -0.5rem;
+  bottom: -0.5rem;
+  background-color: #2563EB;
+  border-radius: 50%;
+  padding: 0.5rem;
+}
+
+.pv-mail-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: white;
+}
+
+.pv-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.pv-description {
+  color: #4B5563;
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 36rem;
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.pv-status-timeline {
+  width: 100%;
+  max-width: 36rem;
+  background-color: #F9FAFB;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.pv-timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pv-timeline-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.pv-check-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #10B981;
+  margin-top: 0.25rem;
+}
+
+.pv-pending-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #2563EB;
+  margin-top: 0.25rem;
+  animation: pv-pulse 2s infinite;
+}
+
+.pv-timeline-content {
+  margin-left: 1rem;
+}
+
+.pv-timeline-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.pv-timeline-description {
+  font-size: 1rem;
+  color: #6B7280;
+}
+
+.pv-next-steps {
+  width: 100%;
+  max-width: 36rem;
+}
+
+.pv-next-steps-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.pv-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pv-step-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.pv-step-number {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #DBEAFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+.pv-step-number span {
+  color: #2563EB;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pv-step-description {
+  margin-left: 1rem;
+  color: #4B5563;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+@keyframes pv-pulse {
+  0% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0.5;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .pv-card {
+      max-width: 100%;
+      padding: 2rem;
+      margin: 1rem;
+  }
+
+  .pv-title {
+      font-size: 1.875rem;
+  }
+
+  .pv-description {
+      font-size: 1rem;
+  }
+
+  .pv-main-icon {
+      width: 5rem;
+      height: 5rem;
+  }
+
+  .pv-clock-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pv-card {
+      padding: 1.5rem;
+  }
+
+  .pv-title {
+      font-size: 1.5rem;
+  }
+
+  .pv-main-icon {
+      width: 4rem;
+      height: 4rem;
+  }
+
+  .pv-clock-icon {
+      width: 2rem;
+      height: 2rem;
+  }
+}

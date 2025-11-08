@@ -1,0 +1,258 @@
+/* Modern Reset and Base Styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.screenBackground {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,247,250,0.95)),
+              url('https://c1.wallpaperflare.com/preview/310/294/573/designing-drawing-notes-office.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.alert-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+  /* Remove or comment out the background-color */
+  /* background-color: rgba(0, 0, 0, 0.5); */
+}
+/* App Container */
+.app {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Form Container */
+.form-container {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  margin: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Form Title */
+.form-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1f36;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  letter-spacing: -0.5px;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Form Fields */
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+.highest-qualification-field{
+  margin-right: -65px;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+  position: relative;
+  transition: all 0.2s ease;
+  margin-right: 85px;
+}
+
+.input-wrapper .icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  font-size: 1rem;
+}
+
+/* Input and Select Styles */
+input,
+select {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  font-size: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  color: #2d3748;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+/* Upload Area */
+.upload-wrapper {
+  border: 2px dashed #e2e8f0;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
+  cursor: pointer;
+}
+
+.upload-wrapper:hover {
+  border-color: #4299e1;
+  background-color: #ebf8ff;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4a5568;
+}
+
+.upload-label .icon {
+  font-size: 1.5rem;
+  color: #4299e1;
+}
+
+.upload-label p {
+  margin: 0;
+}
+
+.small-text {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.file-name {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #4299e1;
+  text-align: center;
+}
+
+/* Buttons */
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancel-button,
+.apply-button {
+  flex: 1;
+  padding: 0.875rem 0.5rem;
+  font-size: 1rem;
+  font-weight: 300;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+
+}
+
+.cancel-button:hover {
+  background-color: #edf2f7;
+}
+
+.apply-button {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+}
+
+.apply-button:hover {
+  background-color: #3182ce;
+  transform: translateY(-1px);
+}
+
+/* Warning Box */
+.warning-box {
+  background-color: #ebf8ff;
+  border: 1px solid #bee3f8;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.warning-box p {
+  margin: 0;
+  color: #2b6cb0;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 1.5rem;
+    margin: 0.5rem;
+  }
+
+  .form-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .apply-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .screenBackground {
+    padding: 1rem;
+  }
+
+  .form-container {
+    padding: 1.25rem;
+    margin: 0;
+  }
+
+  input,
+  select {
+    font-size: 16px; /* Prevents zoom on mobile */
+  }
+}

@@ -1,0 +1,600 @@
+/* Login.css */
+.login-page {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f4ff 0%, #eef1ff 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .animated-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  
+  .blob {
+    position: absolute;
+    width: 20rem;
+    height: 20rem;
+    border-radius: 50%;
+    mix-blend-mode: multiply;
+    filter: blur(30px);
+    animation: blob-animation 7s infinite;
+  }
+  
+  .blob-1 {
+    top: -10rem;
+    right: -10rem;
+    background-color: rgba(167, 139, 250, 0.3);
+  }
+  
+  .blob-2 {
+    bottom: -10rem;
+    left: -10rem;
+    background-color: rgba(251, 191, 36, 0.3);
+    animation-delay: 2s;
+  }
+  
+  .blob-3 {
+    top: 10rem;
+    left: 10rem;
+    background-color: rgba(236, 72, 153, 0.3);
+    animation-delay: 4s;
+  }
+  
+  @keyframes blob-animation {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+    gap: 3rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  @media (min-width: 768px) {
+    .login-container {
+      flex-direction: row;
+      align-items: stretch;
+    }
+  }
+  
+  .branding-section {
+    flex: 1;
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  @media (min-width: 768px) {
+    .branding-section {
+      text-align: left;
+      padding-right: 4rem;
+    }
+  }
+  
+  .main-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    
+  }
+  
+  .highlight {
+    display: block;
+    color: #4f46e5;
+  }
+  
+  .subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .feature-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .feature-card p {
+    color: #4b5563;
+    font-size: 0.875rem;
+  }
+  
+  .form-section {
+    flex: 1;
+    max-width: 28rem;
+    width: 100%;
+  }
+  
+  .login-form-container {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .input-group {
+    width: 100%;
+  }
+  
+  .input-field {
+    width: 85%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+  }
+  
+  .error-message {
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+  
+  .login-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .login-button:hover:not(:disabled) {
+    background-color: #4338ca;
+  }
+  
+  .login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    color: #6b7280;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .divider span {
+    padding: 0 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .google-login {
+    width: 100%;
+  }
+  
+  .links-section {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .links-section p {
+    margin: 0.5rem 0;
+  }
+  
+  .link {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  
+  .link:hover {
+    color: #4338ca;
+  }
+
+  /* Aesthetic Animations for Login Page */
+
+/* Smooth Background Animation */
+.animated-background {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    opacity: 0.1;
+  }
+  
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Gentle Floating Animation for Feature Cards */
+  .feature-card {
+    animation: gentleFloat 6s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  
+  @keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Smooth Title Reveal */
+  .main-title {
+    opacity: 0;
+    animation: revealTitle 1s ease-out forwards;
+  }
+  
+  @keyframes revealTitle {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Elegant Gradient Text */
+  .gradient-text {
+    background: linear-gradient(120deg, #4f46e5, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmerText 8s linear infinite;
+  }
+  
+  @keyframes shimmerText {
+    from { background-position: -500px 0; }
+    to { background-position: 500px 0; }
+  }
+  
+  /* Smooth Input Field Focus Animation */
+  .input-field {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .input-border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  
+  .input-field:focus-within .input-border {
+    transform: scaleX(1);
+  }
+  
+  /* Elegant Button Animation */
+  .login-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .button-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      rgba(255,255,255,0.1),
+      rgba(255,255,255,0.2),
+      rgba(255,255,255,0.1)
+    );
+    animation: buttonGlow 3s linear infinite;
+  }
+  
+  @keyframes buttonGlow {
+    to { left: 100%; }
+  }
+  
+  /* Smooth Loading Animation */
+  .modern-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: smoothSpin 1s linear infinite;
+  }
+  
+  @keyframes smoothSpin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Elegant Form Container Animation */
+  .login-form-container {
+    animation: formReveal 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes formReveal {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Subtle Link Animation */
+  .modern-link {
+    position: relative;
+    color: #4338ca;
+  }
+  
+  .modern-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+  }
+  
+  .modern-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  
+  /* Smooth Error Message Animation */
+  .error-message {
+    animation: errorSlide 0.3s ease-out;
+  }
+  
+  @keyframes errorSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Elegant Divider Animation */
+  .modern-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+  }
+  
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent,
+      rgba(107, 114, 128, 0.2),
+      transparent
+    );
+  }
+  
+  .divider-text {
+    padding: 0 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+    background: white;
+  }
+  
+  /* Smooth Section Transitions */
+  .branding-section,
+  .form-section {
+    opacity: 0;
+    animation: sectionFade 0.8s ease-out forwards;
+  }
+  
+  .form-section {
+    animation-delay: 0.2s;
+  }
+  
+  @keyframes sectionFade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Aesthetic Background Elements */
+  .background-circles {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    overflow: hidden;
+  }
+  
+  .circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, rgba(79, 70, 229, 0.1), rgba(236, 72, 153, 0.1));
+    animation: circleFloat 20s linear infinite;
+  }
+  
+  .circle:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    left: -150px;
+    animation-delay: 0s;
+  }
+  
+  .circle:nth-child(2) {
+    width: 400px;
+    height: 400px;
+    bottom: -200px;
+    right: -200px;
+    animation-delay: -5s;
+  }
+
+  /* signup */
+
+  /* Add these styles to your existing CSS file */
+
+/* Specific styles for signup container */
+.signup-container {
+    min-height: 85vh; /* Reduced from 100vh */
+    padding: 1rem 2rem; /* Reduced vertical padding */
+  }
+  
+  /* Specific styles for signup form container */
+  .signup-form-container {
+    padding: 1.5rem; /* Reduced from 2rem */
+  }
+  
+  /* Adjust vertical spacing in the form */
+  .signup-container .login-form {
+    gap: 0.75rem; /* Reduced from 1rem */
+  }
+  
+  /* Adjust the main title spacing */
+  .signup-container .main-title {
+    margin-bottom: 0.75rem; /* Reduced from 1rem */
+    font-size: 2.25rem; /* Slightly smaller */
+  }
+  
+  /* Adjust subtitle spacing */
+  .signup-container .subtitle {
+    margin-bottom: 1.5rem; /* Reduced from 2rem */
+  }
+  
+  /* Make features grid more compact */
+  .signup-container .features-grid {
+    margin-top: 1.5rem; /* Reduced from 2rem */
+    gap: 0.75rem;
+  }
+  
+  /* Adjust feature cards */
+  .signup-container .feature-card {
+    padding: 0.75rem; /* Reduced from 1rem */
+  }
+  
+  /* Adjust form title spacing */
+  .signup-container .form-title {
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+  }
+  
+  /* Adjust input fields */
+  .signup-container .input-field {
+    padding: 0.625rem 1rem; /* Reduced from 0.75rem 1rem */
+  }
+  
+  /* Adjust divider spacing */
+  .signup-container .modern-divider {
+    margin: 1rem 0; /* Reduced from 1.5rem */
+  }
+  
+  /* Adjust links section spacing */
+  .signup-container .links-section {
+    margin-top: 1rem; /* Reduced from 1.5rem */
+  }
+  
+  /* Remove any extra bottom margin from the last form element */
+  .signup-container .login-form > *:last-child {
+    margin-bottom: 0;
+  }
+  @keyframes circleFloat {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(30px, -30px) scale(1.05);
+    }
+  }
+  
