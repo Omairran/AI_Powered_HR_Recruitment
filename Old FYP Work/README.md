@@ -54,19 +54,32 @@ Ensure you have the following installed:
 - Virtual environment (`venv` or `conda`)  
 
 ### **Backend Setup (Django)**
-```bash
-git clone https://github.com/ZubairKhan87/AI-Powered-Interviewing-System.git
-cd AI-Interview-System/backend
+
+cd Backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+venv\Scripts\Activate
+pip install Django
+pip install djangorestframework-simplejwt
+pip install djangorestframework
+pip install social-auth-app-Django
+pip install django-filter
+pip install google-auth google-auth-oauthlib google-auth-httplib2
+pip install huggingface_hub
+pip install transformers accelerate sentencepiece
+pip install groq
+python.exe -m pip install --upgrade pip
+pip install django-cors-headers
+pip install drf-yasg
+pip install pillow
 python manage.py migrate
 python manage.py runserver
-```
 
 ### **Frontend Setup (React)**
-```bash
 cd Frontend
 npm install
 npm run dev
-```
+
+### **Admin Dashboard**
+http://127.0.0.1:8000/admin/
+username:  omair
+Password:  namal123
