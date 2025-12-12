@@ -54,7 +54,7 @@ Ensure you have the following installed:
 - Virtual environment (`venv` or `conda`)  
 
 ### **Backend Setup (Django)**
-
+---
 cd Backend
 python -m venv venv
 venv\Scripts\Activate
@@ -74,12 +74,16 @@ pip install pillow
 python manage.py migrate
 python manage.py runserver
 
+---
 ### **Frontend Setup (React)**
+---
 cd Frontend
 npm install
 npm run dev
-
+---
 ### **Admin Dashboard**
+---
 http://127.0.0.1:8000/admin/
 username:  omair
 Password:  namal123
+---
