@@ -86,4 +86,13 @@ Ensure you have the following installed:
 - http://127.0.0.1:8000/admin/
 - username:  omair
 - Password:  namal123
+
+- python manage.py createsuperuser
 ---
+### **Github Commands**
+- git status
+- git add .
+- git commit -m "Your comments"
+- git push origin main
+
+- git pull origin main
