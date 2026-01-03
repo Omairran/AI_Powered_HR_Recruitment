@@ -1902,3 +1902,30 @@ Unauthorized: /api/chat/save-frame/
 Unauthorized: /api/chat/save-frame/
 Unauthorized: /api/job_posting/current-candidate/profile/
 Unauthorized: /api/job_posting/current-candidate/profile/
+From G:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From G:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Bad Request: /api/authentication/register/
+Bad Request: /api/authentication/register/
+Bad Request: /api/job_posting/apply/
+Bad Request: /api/confidence_prediction/verify-face/
+Bad Request: /api/confidence_prediction/verify-face/
+Unauthorized: /api/job_posting/publicposts/
+Unauthorized: /api/job_posting/publicposts/
+Unauthorized: /api/authentication/profile/image/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/chat/current-candidate/
+Unauthorized: /api/authentication/profile/image/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/chat/current-candidate/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/authentication/token/refresh/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
