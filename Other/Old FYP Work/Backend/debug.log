@@ -1941,3 +1941,55 @@ Error processing image path: Profile image not found at: E:\AI_Powered_HR_Recrui
 Bad Request: /api/confidence_prediction/verify-face/
 Bad Request: /api/confidence_prediction/verify-face/
 >>>>>>> 5db3dd6e85276ff7e5e926dec65f388567871521:Old FYP Work/Backend/debug.log
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+Internal Server Error: /api/chat/chat/
+Traceback (most recent call last):
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py", line 413, in chatbot_response
+    completion = client.chat.completions.create(
+    model="llama3-8b-8192",
+    ...<5 lines>...
+    stop=None,
+    )
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\resources\chat\completions.py", line 461, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/openai/v1/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<45 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}

@@ -70,6 +70,7 @@ Ensure you have the following installed:
 - pip install numpy
 - pip install opencv-python
 - pip install tensorflow==2.20
+- pip install tf-keras
 - pip install deepface
 - python.exe -m pip install --upgrade pip
 - pip install django-cors-headers
