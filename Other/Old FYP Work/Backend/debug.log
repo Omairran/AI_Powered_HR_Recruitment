@@ -1344,6 +1344,7 @@ Traceback (most recent call last):
     raise ValueError(f"User {self.user.username} is not marked as a recruiter.")
                              ^^^^^^^^^
 AttributeError: 'RecruiterTable' object has no attribute 'user'
+<<<<<<< HEAD:Other/Old FYP Work/Backend/debug.log
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 Watching for file changes with StatReloader
@@ -1929,3 +1930,14 @@ Forbidden: /api/authentication/recruiter/
 Forbidden: /api/authentication/recruiter/
 Forbidden: /api/authentication/recruiter/
 Forbidden: /api/authentication/recruiter/
+=======
+From E:\AI_Powered_HR_Recruitment\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Error processing image path: Profile image not found at: E:\AI_Powered_HR_Recruitment\Old FYP Work\Backend\media\profile_images/55_WhatsApp%20Image%202025-11-27%20at%2012.00.03%20PM.jpeg
+Error processing image path: Profile image not found at: E:\AI_Powered_HR_Recruitment\Old FYP Work\Backend\media\profile_images/55_WhatsApp%20Image%202025-11-27%20at%2012.00.03%20PM.jpeg
+Bad Request: /api/confidence_prediction/verify-face/
+Bad Request: /api/confidence_prediction/verify-face/
+>>>>>>> 5db3dd6e85276ff7e5e926dec65f388567871521:Old FYP Work/Backend/debug.log
