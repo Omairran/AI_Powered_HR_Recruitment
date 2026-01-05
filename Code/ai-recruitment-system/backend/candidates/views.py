@@ -11,7 +11,9 @@ from .serializers import (
     CandidateListSerializer,
     CandidateCreateSerializer
 )
+#from .utils.resume_parser import PakistanResumeParser
 from .utils.resume_parser import EnhancedResumeParser
+#from .utils.resume_parser import AdvancedResumeParser as EnhancedResumeParser
 
 
 class CandidateApplicationView(generics.CreateAPIView):
