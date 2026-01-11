@@ -20,38 +20,65 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from job_posting.models import JobPostingTable, ApplicationTable
 from authentication.models import CandidateTable
 from groq import Groq
-# print(huggingface_hub._version_)
-# Initialize the inference client
-client = Groq(api_key="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")
-# job = "Python programmer"
-# Skills="Object oriented programming, functions, and Data structures"
-# candidate_name="Faizaaaan"
-# experience="Fresher"
+import threading
+
+# Initialize the Groq client
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
 
 # Helper function to get interview details from database
 def get_interview_details(job_id, candidate_id):
     """
     Fetches job and candidate details from database for the interview.
     """
-    job = get_object_or_404(JobPostingTable, id=job_id)
-    candidate = get_object_or_404(CandidateTable, id=candidate_id)
-    
-    # Get the application
-    application = get_object_or_404(ApplicationTable, job=job, candidate=candidate)
-    
-    # Convert skills list to string format for LLM
-    base_skills = "Object oriented programming, functions, and Data structures"
-    job_specific_skills = ", ".join(job.skills)  # Assuming skills is stored as JSON array
-    combined_skills = f"{base_skills}, {job_specific_skills}"
-    
-    return {
-        'job': job.title,
-        'skills': combined_skills,
-        'experience': job.experience_level,
-        'candidate_name': application.full_name,
-        'profile_image':candidate.profile_image,
-        'interview_frames': application.interview_frames
-    }
+    try:
+        print(f"Looking for job with ID: {job_id}")
+        job = get_object_or_404(JobPostingTable, id=job_id)
+        print(f"Found job: {job.title}")
+        
+        print(f"Looking for candidate with ID: {candidate_id}")
+        candidate = get_object_or_404(CandidateTable, id=candidate_id)
+        print(f"Found candidate: {candidate.candidate_name if hasattr(candidate, 'candidate_name') else 'Unknown'}")
+        
+        # Get the application
+        print(f"Looking for application with job_id={job_id}, candidate_id={candidate_id}")
+        application = get_object_or_404(ApplicationTable, job=job, candidate=candidate)
+        print(f"Found application for: {application.full_name}")
+        
+        # Convert skills list to string format for LLM
+        base_skills = "Object oriented programming, functions, and Data structures"
+        
+        # Handle skills - check if it's a list or string
+        if hasattr(job, 'skills'):
+            if isinstance(job.skills, list):
+                job_specific_skills = ", ".join(job.skills)
+            elif isinstance(job.skills, str):
+                job_specific_skills = job.skills
+            else:
+                job_specific_skills = str(job.skills)
+        else:
+            job_specific_skills = ""
+            
+        combined_skills = f"{base_skills}, {job_specific_skills}" if job_specific_skills else base_skills
+        
+        result = {
+            'job': job.title,
+            'skills': combined_skills,
+            'experience': job.experience_level if hasattr(job, 'experience_level') else 'Not specified',
+            'candidate_name': application.full_name,
+            'profile_image': candidate.profile_image if hasattr(candidate, 'profile_image') else None,
+            'interview_frames': application.interview_frames if hasattr(application, 'interview_frames') else []
+        }
+        
+        print(f"Successfully built interview details: {result['job']} for {result['candidate_name']}")
+        return result
+        
+    except Exception as e:
+        print(f"ERROR in get_interview_details: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 def get_intent(response):
     """
@@ -69,8 +96,8 @@ def get_intent(response):
     Return exact intent, not its number"""
     try:
         # Generate intent classification
-        intent_response =client.chat.completions.create(
-            model="llama3-8b-8192",
+        intent_response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",  # Updated to current Groq model
             messages=[
                 {
                     "role": "user",
@@ -78,13 +105,10 @@ def get_intent(response):
                 },
             ],
             temperature=1,
-            # max_completion_tokens=1024,
             top_p=1,
-            # stream=True,
             stop=None,
         )
         # Extract intent from the LM's response
-        # intent_message = intent_response.choices[0].message['content'].strip()
         intent_message = intent_response.choices[0].message.content.strip()
         return intent_message
     except Exception as e:
@@ -100,6 +124,7 @@ def extract_questions(text):
     
     # Join the questions with a space
     return ' '.join(questions)
+
 def extract_score_and_comment(score_response):
     """
     Extracts the score and comment from the response string.
@@ -118,10 +143,10 @@ def score_answer(question, answer):
     """
     question = extract_questions(question)
     print("The question was:", question)
-    print("\n"*4)
+    print("\n" * 4)
     print("The answer is: ", answer)
     if not question:
-        return "Not APplicable"
+        return "Not Applicable"
     scoring_prompt = f"""
     You are an evaluator for a technical job interview answers. Score the candidate's answer to the question on a scale from 0 to 10.
     Provide the score only if the answer is relevant and addresses the question.
@@ -146,7 +171,7 @@ def score_answer(question, answer):
     try:
         # Generate score
         score_response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.3-70b-versatile",  # Updated to current Groq model
             messages=[
                 {
                     "role": "user",
@@ -154,23 +179,16 @@ def score_answer(question, answer):
                 },
             ],
             temperature=1,
-            # max_completion_tokens=1024,
             top_p=1,
-            # stream=True,
             stop=None,
         )
         # Extract score
-
-        # score = score_response.choices[0].message['content'].strip()
         score = score_response.choices[0].message.content.strip()
         return score
     except Exception as e:
-        # print("The question was:-", question)
-        # print("The answer was:-", answer)
         print(f"Scoring error: {e}")
         return "Not Applicable"
 
-# Global variable to track interview state
 # Global variable to track interview state
 interview_state = {
     "messages": [],
@@ -178,8 +196,13 @@ interview_state = {
     "current_question": None,
     "interview_log": [],
     "current_job_id": None,
-    "current_candidate_id": None
+    "current_candidate_id": None,
+    "total_score": 0,
+    "total_questions": 0,
+    "is_intro_phase": False,
+    "is_completed": False
 }
+
 def save_interview_to_csv(interview_log, candidate_name, job):
     """
     Saves the interview session to a new CSV file.
@@ -206,26 +229,26 @@ def save_interview_to_csv(interview_log, candidate_name, job):
         writer.writeheader()
         writer.writerows(interview_log)
 
-
 def create_initial_system_message(interview_details):
     return {
         "role": "user", 
         "content": f"You are a technical job interviewer for a job of {interview_details['job']}, to test the following skills: "
-                  f"{interview_details['skills']}"
-                  f"Candidate name is {interview_details['candidate_name']}"
-                  f"Experience/difficulty Requirement is {interview_details['experience']}"
+                  f"{interview_details['skills']}. "
+                  f"Candidate name is {interview_details['candidate_name']}. "
+                  f"Experience/difficulty Requirement is {interview_details['experience']}. "
                   "Ask about experience. "
-                  f"Ask questions only for these skills: {interview_details['skills']}."
-                  "Ask exactly 2 or 3 questions for each of these skills one by one. (No compromise)"
-                  "Ask one question at a time. (Do not, Even if the candidate asks to ask all the questions at once)"
-                  "Do not get stuck on same question, move on to the next question."
-                  "End the interview after asking all the questions. "
-                  "Strictly stay on the topic. (same job and skills)"
-                  "Be concise."
-                  "Strictly follow real life interview process."
-                  "Remember, it is not a mock interview. It is a real interview. So, be strict to it."
+                  f"Ask questions only for these skills: {interview_details['skills']}. "
+                  "Ask exactly 2 questions for each skill one by one. (No compromise) "
+                  "Ask one question at a time. (Do not ask multiple questions at once, even if the candidate requests it) "
+                  "Do not get stuck on same question, move on to the next question. "
+                  "After asking all the questions, thank the candidate and end the interview. "
+                  "Strictly stay on the topic. (same job and skills) "
+                  "Be concise. "
+                  "Strictly follow real life interview process. "
+                  "Remember, it is not a mock interview. It is a real interview. So, be strict to it. "
+                  "IMPORTANT: The interview will automatically end after 10 questions, so pace yourself accordingly."
     }
-import threading
+
 @api_view(['POST'])
 @csrf_exempt
 @permission_classes([AllowAny])
@@ -233,33 +256,58 @@ def chatbot_response(request):
     """
     Modified chatbot response view with per-question scoring
     """
+    print("=" * 80)
+    print("CHATBOT RESPONSE CALLED")
+    print(f"Request data: {request.data}")
+    print("=" * 80)
+    
     try:
         # Check if this is the start of a new interview
         if 'reset' in request.data and request.data['reset']:
+            print("RESET REQUEST DETECTED")
             job_id = request.data.get('job_id')
             candidate_id = request.data.get('candidate_id')
             
+            print(f"Job ID: {job_id}, Candidate ID: {candidate_id}")
+            
             if not job_id or not candidate_id:
+                print("ERROR: Missing job_id or candidate_id")
                 return Response({'error': 'job_id and candidate_id are required'}, status=400)
             
-            interview_details = get_interview_details(job_id, candidate_id)
+            print("Fetching interview details...")
+            try:
+                interview_details = get_interview_details(job_id, candidate_id)
+                print(f"Interview details retrieved: {interview_details['job']}, {interview_details['candidate_name']}")
+            except Exception as detail_error:
+                print(f"ERROR in get_interview_details: {detail_error}")
+                import traceback
+                traceback.print_exc()
+                return Response({'error': f'Failed to get interview details: {str(detail_error)}'}, status=500)
             
             # Reset interview state
+            print("Resetting interview state...")
             interview_state["messages"] = [create_initial_system_message(interview_details)]
             interview_state["question_count"] = 0
             interview_state["current_question"] = None
             interview_state["interview_log"] = []
-            interview_state["total_score"] = 0  # Initialize total score
-            interview_state["total_questions"] = 0  # Track number of scored questions
+            interview_state["total_score"] = 0
+            interview_state["total_questions"] = 0
             interview_state["current_job_id"] = job_id
             interview_state["current_candidate_id"] = candidate_id
+            interview_state["is_intro_phase"] = True
+            interview_state["is_completed"] = False
             
             initial_message = f"Hello! Nice to meet you, dear {interview_details['candidate_name']}. Can you please introduce yourself?"
+            
+            # Set this as the current question
+            interview_state["current_question"] = initial_message
+            
+            print(f"Sending initial message: {initial_message}")
+            
             return Response({
                 'response': initial_message, 
                 'reset': True,
-                'candidateName': interview_details['candidate_name']  # Add this line
-
+                'candidateName': interview_details['candidate_name']
             })
     except Exception as e:
         print(f"Error in chatbot_response: {e}")
@@ -267,14 +315,25 @@ def chatbot_response(request):
     
     # Get user input
     user_input = request.data.get('message', '')
+    print(f"USER INPUT: '{user_input}'")
+    
+    if not user_input:
+        print("ERROR: No user input provided!")
+        return Response({'error': 'No message provided'}, status=400)
 
     # Perform intent classification
     intent = get_intent(user_input)
     print(f"Detected Intent: {intent}")
+    print(f"Current interview state: question_count={interview_state['question_count']}, "
+          f"is_intro_phase={interview_state.get('is_intro_phase', False)}, "
+          f"total_questions={interview_state['total_questions']}")
+    print(f"Messages in conversation: {len(interview_state['messages'])}")
 
     # Check if the intent is to quit the interview or max questions reached
-    if intent == "Quit_interview" or interview_state["question_count"] >= 9:
-        print("Yaaar ye function q chal rha hai pta ni")
+    # Interview ends at 10 questions (after intro which is not counted)
+    if intent == "Quit_interview" or interview_state["question_count"] >= 10:
+        print("Interview ending - starting background tasks")
+        print(f"Reason: Intent={intent}, Question count={interview_state['question_count']}")
         interview_state["is_completed"] = True
         
         # Define the face verification function
@@ -294,6 +353,7 @@ def chatbot_response(request):
             
             print("Verification Results List:", verification_results_list)
             print("Verification Summary:", verification_summary)
+            
             # Confidence Prediction Function
             def run_confidence_prediction():
                 print("Running Confidence Prediction Model...")
@@ -303,10 +363,10 @@ def chatbot_response(request):
                     interview_state["current_candidate_id"],
                     interview_state["current_job_id"]
                 )
-                confidence_results_avg = confidence_results.get("confidence_scores")
+                confidence_results_scores = confidence_results.get("confidence_scores")
                 confidence_results_avg = confidence_results.get("average_confidence")
                 confidence_results_score = confidence_results.get("final_score")
-                print("Confidence Predicted Score Per Frame: ", confidence_results_avg)
+                print("Confidence Predicted Score Per Frame: ", confidence_results_scores)
                 print("Confidence Prediction Average Score: ", confidence_results_avg)
                 print("Confidence Prediction Score with 20% Weighted: ", confidence_results_score)
 
@@ -329,111 +389,284 @@ def chatbot_response(request):
             # Run confidence prediction in a separate thread
             confidence_thread = threading.Thread(target=run_confidence_prediction, daemon=True)
             confidence_thread.start()
+            
             # Move this calculation inside the function
             if interview_state["total_questions"] > 0:
                 total_score = round(interview_state['total_score'], 1)
                 total_possible = interview_state["total_questions"] * 10
                 marks_string = f"{total_score}/{total_possible}"
-                print("total_possible", total_possible)
-                print("marks_string ", marks_string)
+                print("=" * 80)
+                print(f"FINAL INTERVIEW RESULTS:")
+                print(f"Total Score: {total_score}")
+                print(f"Total Possible: {total_possible}")
+                print(f"Marks String: {marks_string}")
+                print(f"Total Questions Scored: {interview_state['total_questions']}")
+                print("=" * 80)
                 
                 # Update database inside the function
                 if interview_state["current_job_id"] and interview_state["current_candidate_id"]:
                     try:
+                        print(f"Looking for application: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
+                        
                         application = ApplicationTable.objects.get(
                             job_id=interview_state["current_job_id"],
                             candidate_id=interview_state["current_candidate_id"]
                         )
+                        
+                        print(f"Found application ID: {application.id}")
+                        
+                        # Update interview results
                         application.interview_status = True
                         application.marks = marks_string
-                        print("marks",application.marks)
-                        # Make sure verification_results is in the correct format for JSONField
-                        # If it's a dictionary, Django can handle it directly
-                        print("here for submitting verification results")
+                        
+                        print(f"Updated marks to: {application.marks}")
+                        print("Setting face verification results...")
                         application.face_verification_result = verification_results_list
-
-                        print("verification_results", application.face_verification_result)
+                        print(f"Verification results set: {len(verification_results_list)} results")
+                        
                         # Check verification rate and set flag_status accordingly
                         verification_rate = verification_summary.get("verification_rate", 0)
+                        print(f"Verification rate: {verification_rate}%")
+                        
                         if verification_rate > 80:
                             application.flag_status = False  # Good verification rate
+                            print("Flag status: False (Good verification)")
                         else:
                             application.flag_status = True   # Poor verification rate
+                            print("Flag status: True (Poor verification - possible cheating)")
 
+                        # Save all changes
                         application.save()
-                        print(f"Successfully updated marks and verification results")
-                        print(f"Successfully saved results. Verification rate: {verification_rate}%, Flag status: {application.flag_status}")
+                        print("=" * 80)
+                        print("✅ APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
+                        print(f"Interview Status: {application.interview_status}")
+                        print(f"Marks: {application.marks}")
+                        print(f"Flag Status: {application.flag_status}")
+                        print(f"Verification Rate: {verification_rate}%")
+                        print("=" * 80)
 
                     except ApplicationTable.DoesNotExist:
-                        print("Application not found")
+                        print("=" * 80)
+                        print("❌ ERROR: Application not found in database")
+                        print(f"Searched for: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
+                        print("=" * 80)
                     except Exception as e:
-                        print(f"Error updating application: {e}")
+                        print("=" * 80)
+                        print(f"❌ ERROR updating application: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        print("=" * 80)
+            else:
+                print("=" * 80)
+                print("⚠️ WARNING: No questions were scored, not updating database")
+                print("=" * 80)
         
         # Start the verification in a background thread
         thread = threading.Thread(target=run_face_verification, daemon=True)
         thread.start()
         
         response_data = {
-            'response': "Thankyou for your time. The interview is now completed. Good luck with your application",
+            'response': "Thank you for your time. The interview is now completed. Your responses are being evaluated. Good luck with your application!",
             'question_count': interview_state["question_count"],
-            'intent': intent
+            'intent': intent,
+            'interview_ended': True  # Add this flag for frontend
         }
         return Response(response_data)
 
     # Append the user's message to the conversation history
     interview_state["messages"].append({"role": "user", "content": user_input})
 
-    # Score the answer if there's a current question
-    if interview_state["current_question"]:
-        score = score_answer(interview_state["current_question"], user_input)
-        # Extract score and comment
-        score, comment = extract_score_and_comment(score)
+    # Score the answer if there's a current question AND we're past intro
+    if interview_state["current_question"] and not interview_state.get("is_intro_phase", False):
+        score_result = score_answer(interview_state["current_question"], user_input)
+        score, comment = extract_score_and_comment(score_result)
+        
+        print(f"DEBUG: Raw score_result = '{score_result}'")
+        print(f"DEBUG: Extracted score = {score}, comment = '{comment}'")
         
         # Update total score only if it's a numeric score
-        try:
-            numeric_score = float(score)
-            interview_state["total_score"] += numeric_score
-            interview_state["total_questions"] += 1
-        except (ValueError, TypeError):
-            # Skip if score is "Not Applicable" or invalid
-            pass
-            
-        print(f"Score for the answer: {score}")
+        if score is not None:
+            try:
+                numeric_score = float(score)
+                interview_state["total_score"] += numeric_score
+                interview_state["total_questions"] += 1
+                print(f"✅ Score added: {score}/10 - {comment}")
+                print(f"📊 Running total: {interview_state['total_score']}/{interview_state['total_questions']*10}")
+            except (ValueError, TypeError) as e:
+                print(f"⚠️ Score parsing failed: {e}")
+                print(f"Score was: {score_result}")
+        else:
+            print(f"⚠️ Score was None, result was: {score_result}")
+        
         # Log the interview details
         interview_log_entry = {
             "question": interview_state["current_question"],
             "answer": user_input,
-            "score": score,
-            "comment": comment,
-            "running_total": f"{interview_state['total_score']}/{interview_state['total_questions']*10}"
+            "score": score if score else "Not Applicable",
+            "comment": comment if comment else "",
+            "running_total": f"{interview_state['total_score']}/{interview_state['total_questions']*10}" if interview_state['total_questions'] > 0 else "0/0"
         }
         interview_state["interview_log"].append(interview_log_entry)
+    elif interview_state.get("is_intro_phase", False):
+        # If it's intro phase, just log without scoring
+        print("Introduction phase - not scoring this response")
+        interview_state["is_intro_phase"] = False  # End intro phase after first response
 
     # Generate the assistant's response
     completion = client.chat.completions.create(
-    model="llama3-8b-8192",
-    messages=interview_state["messages"],
-    temperature=1,
-    # max_completion_tokens=1024,
-    top_p=1,
-    # stream=True,
-    stop=None,
+        model="llama-3.3-70b-versatile",  # Updated to current Groq model
+        messages=interview_state["messages"],
+        temperature=1,
+        top_p=1,
+        stop=None,
     )
 
     # Extract the assistant's message
     assistant_message = completion.choices[0].message.content
 
-    # Update current question if it contains a question mark
-    interview_state["current_question"] = assistant_message if "?" in assistant_message else None
-
-    # Append the assistant's response to the conversation history
+    # Append the assistant message to messages
     interview_state["messages"].append({"role": "assistant", "content": assistant_message})
 
-    # Increment question count if a technical question is asked
-    if "?" in assistant_message:
+    # Set current_question to LLM's response
+    interview_state["current_question"] = assistant_message
+
+    # Increment question count only for actual questions (not intro)
+    if not interview_state.get("is_intro_phase", False):
         interview_state["question_count"] += 1
 
-    print('response', assistant_message,)
+    print(f'Question #{interview_state["question_count"]}: {assistant_message}')
+    
+    # CHECK AGAIN AFTER INCREMENT - if we've now reached 10 questions, end the interview
+    if interview_state["question_count"] >= 10:
+        print("=" * 80)
+        print(f"INTERVIEW LIMIT REACHED: {interview_state['question_count']} questions asked")
+        print("Triggering interview completion...")
+        print("=" * 80)
+        
+        interview_state["is_completed"] = True
+        
+        # Define face verification function inline
+        def run_face_verification():
+            full_verification_response = verify_interview_frames(
+                interview_state["current_candidate_id"],
+                interview_state["current_job_id"]
+            )
+            print("Face Verification Full Response:", full_verification_response)
+            
+            verification_results_list = full_verification_response.get("verification_results", [])
+            verification_summary = full_verification_response.get("summary", {})
+            
+            print("Verification Results List:", verification_results_list)
+            print("Verification Summary:", verification_summary)
+            
+            def run_confidence_prediction():
+                print("Running Confidence Prediction Model...")
+                
+                confidence_results = confidence_prediction(
+                    interview_state["current_candidate_id"],
+                    interview_state["current_job_id"]
+                )
+                confidence_results_scores = confidence_results.get("confidence_scores")
+                confidence_results_avg = confidence_results.get("average_confidence")
+                confidence_results_score = confidence_results.get("final_score")
+                print("Confidence Predicted Score Per Frame: ", confidence_results_scores)
+                print("Confidence Prediction Average Score: ", confidence_results_avg)
+                print("Confidence Prediction Score with 20% Weighted: ", confidence_results_score)
+
+                try:
+                    application = ApplicationTable.objects.get(
+                        job_id=interview_state["current_job_id"],
+                        candidate_id=interview_state["current_candidate_id"]
+                    )
+                    application.confidence_score = confidence_results_score
+                    application.save()
+                    print("Successfully saved confidence prediction results.")
+                except ApplicationTable.DoesNotExist:
+                    print("Application not found for confidence prediction.")
+                except Exception as e:
+                    print(f"Error updating confidence prediction: {e}")
+
+            confidence_thread = threading.Thread(target=run_confidence_prediction, daemon=True)
+            confidence_thread.start()
+            
+            if interview_state["total_questions"] > 0:
+                total_score = round(interview_state['total_score'], 1)
+                total_possible = interview_state["total_questions"] * 10
+                marks_string = f"{total_score}/{total_possible}"
+                print("=" * 80)
+                print(f"FINAL INTERVIEW RESULTS:")
+                print(f"Total Score: {total_score}")
+                print(f"Total Possible: {total_possible}")
+                print(f"Marks String: {marks_string}")
+                print(f"Total Questions Scored: {interview_state['total_questions']}")
+                print("=" * 80)
+                
+                if interview_state["current_job_id"] and interview_state["current_candidate_id"]:
+                    try:
+                        print(f"Looking for application: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
+                        
+                        application = ApplicationTable.objects.get(
+                            job_id=interview_state["current_job_id"],
+                            candidate_id=interview_state["current_candidate_id"]
+                        )
+                        
+                        print(f"Found application ID: {application.id}")
+                        
+                        application.interview_status = True
+                        application.marks = marks_string
+                        
+                        print(f"Updated marks to: {application.marks}")
+                        print("Setting face verification results...")
+                        application.face_verification_result = verification_results_list
+                        print(f"Verification results set: {len(verification_results_list)} results")
+                        
+                        verification_rate = verification_summary.get("verification_rate", 0)
+                        print(f"Verification rate: {verification_rate}%")
+                        
+                        if verification_rate > 80:
+                            application.flag_status = False
+                            print("Flag status: False (Good verification)")
+                        else:
+                            application.flag_status = True
+                            print("Flag status: True (Poor verification - possible cheating)")
+
+                        application.save()
+                        print("=" * 80)
+                        print("✅ APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
+                        print(f"Interview Status: {application.interview_status}")
+                        print(f"Marks: {application.marks}")
+                        print(f"Flag Status: {application.flag_status}")
+                        print(f"Verification Rate: {verification_rate}%")
+                        print("=" * 80)
+
+                    except ApplicationTable.DoesNotExist:
+                        print("=" * 80)
+                        print("❌ ERROR: Application not found in database")
+                        print(f"Searched for: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
+                        print("=" * 80)
+                    except Exception as e:
+                        print("=" * 80)
+                        print(f"❌ ERROR updating application: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        print("=" * 80)
+            else:
+                print("=" * 80)
+                print("⚠️ WARNING: No questions were scored, not updating database")
+                print("=" * 80)
+        
+        thread = threading.Thread(target=run_face_verification, daemon=True)
+        thread.start()
+        
+        response_data = {
+            'response': "Thank you for your time. The interview is now completed. Your responses are being evaluated. Good luck with your application!",
+            'question_count': interview_state["question_count"],
+            'intent': 'Quit_interview',
+            'interview_ended': True
+        }
+        
+        return Response(response_data)
+    
     # Prepare response
     response_data = {
         'response': assistant_message,
@@ -450,7 +683,6 @@ def chatbot_page(request):
     return render(request, 'chatbot.html')
 
 
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.files.storage import default_storage
@@ -459,12 +691,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
-import os
 import logging
 
 logger = logging.getLogger(__name__)
 from django.middleware.csrf import get_token
-from job_posting.models import ApplicationTable # Import the ApplicationTable model
+
 @ensure_csrf_cookie
 def get_csrf_token(request):
     """
@@ -551,12 +782,6 @@ def save_frame(request):
             'success': False,
             'error': str(e)
         }, status=500)
-# views.py in your candidates app
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from authentication.models import CandidateTable
-from django.shortcuts import get_object_or_404
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -570,17 +795,14 @@ def get_current_candidate(request):
             'id': candidate.id,
             'name': candidate.candidate_name,
             'email': candidate.candidate_email,
-            'profile':candidate.profile_image
+            'profile': candidate.profile_image
         })
     except Exception as e:
         return Response({'error': str(e)}, status=400)
-    
-
 
 
 from rest_framework.response import Response
 import requests
-from django.conf import settings
 
 def verify_interview_frames(candidate_id, job_id):
     """
@@ -614,7 +836,6 @@ def verify_interview_frames(candidate_id, job_id):
     except Exception as e:
         logger.error(f"Error in frame verification: {e}")
         return None
-    
 
 
 def confidence_prediction(candidate_id, job_id):

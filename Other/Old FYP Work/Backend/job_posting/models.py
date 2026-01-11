@@ -29,6 +29,12 @@ class ApplicationTable(models.Model):
     job = models.ForeignKey(JobPostingTable, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=110)
     email = models.EmailField()
+
+    
+    # 🔴 ADD THESE
+    interview_step = models.IntegerField(default=0)
+    interview_completed = models.BooleanField(default=False)
+
     marks = models.CharField(max_length=20, null=True, blank=True)  # Changed from IntegerField
     interview_status=models.BooleanField(default=False)
     qualification = models.CharField(max_length=45)

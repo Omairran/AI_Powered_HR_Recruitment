@@ -2066,3 +2066,442 @@ Watching for file changes with StatReloader
 Watching for file changes with StatReloader
 From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
 
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Not Found: /favicon.ico
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+Internal Server Error: /api/chat/chat/
+Traceback (most recent call last):
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py", line 413, in chatbot_response
+    completion = client.chat.completions.create(
+    model="llama3-8b-8192",
+    ...<5 lines>...
+    stop=None,
+    )
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\resources\chat\completions.py", line 461, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/openai/v1/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<45 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Not Found: /favicon.ico
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 400 Bad Request"
+Internal Server Error: /api/chat/chat/
+Traceback (most recent call last):
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\generic\base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\rest_framework\decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py", line 474, in chatbot_response
+    completion = client.chat.completions.create(
+        model="llama3-8b-8192",
+    ...<3 lines>...
+        stop=None,
+    )
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\resources\chat\completions.py", line 461, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/openai/v1/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<45 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\groq\_base_client.py", line 1044, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.BadRequestError: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Image preprocessing error: Could not read image
+Verification error: Image preprocessing failed: Could not read image
+Bad Request: /api/confidence_prediction/verify-face/
+Retrying request to /openai/v1/chat/completions in 0.406850 seconds
+Retrying request to /openai/v1/chat/completions in 0.767684 seconds
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+Forbidden: /api/authentication/recruiter/
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Not Found: /favicon.ico
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/chat/save-frame/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/chat/current-candidate/
+Unauthorized: /api/job_posting/candidate/applied-jobs/
+Unauthorized: /api/chat/current-candidate/
+Unauthorized: /api/authentication/token/refresh/
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131452_417081.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131452_417081.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131457_394688.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131452_417081.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131457_394688.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131502_390673.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131452_417081.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131457_394688.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131502_390673.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131507_394309.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131357_441446.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131402_395629.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131407_386466.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131412_402565.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131417_431542.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131422_460856.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131427_399597.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131432_429207.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131437_426147.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131442_378643.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131447_386268.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131452_417081.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131457_394688.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131502_390673.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131507_394309.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_16_candidate_41_frame_20260111_131512_430612.jpg', 'verified': False}]
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\interview\views.py changed, reloading.
+Watching for file changes with StatReloader
+From E:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
