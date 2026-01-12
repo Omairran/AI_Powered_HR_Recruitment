@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     
     # Your apps
     'candidates',
+    'jobs',  # ADD THIS LINE
 ]
 
 MIDDLEWARE = [
