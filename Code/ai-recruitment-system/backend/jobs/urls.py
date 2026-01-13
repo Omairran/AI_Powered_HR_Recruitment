@@ -5,11 +5,13 @@ URL Configuration for Jobs App
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import JobViewSet, JobApplicationViewSet
+from .matching_views import MatchingViewSet  # ADD THIS
 
 # Create router for viewsets
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet, basename='job')
 router.register(r'job-applications', JobApplicationViewSet, basename='job-application')
+router.register(r'matching', MatchingViewSet, basename='matching')  # ADD THIS
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -62,3 +64,4 @@ QUERY PARAMETERS for GET /api/job-applications/:
 
 Example: /api/job-applications/?job_id=5&status=shortlisted&sort_by=match_score
 """
+
