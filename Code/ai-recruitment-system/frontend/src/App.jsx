@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CandidateApplicationForm from './components/CandidateApplicationForm';
 import JobListings from './components/Jobs/JobListings';
+import HRDashboard from './components/Jobs/HRDashboard';
 import './App.css';
 
 function App() {
@@ -24,11 +25,19 @@ function App() {
             >
               Apply as Candidate
             </button>
+            <button 
+              onClick={() => setCurrentPage('hr-dashboard')}
+              className={currentPage === 'hr-dashboard' ? 'active' : ''}
+            >
+              HR Dashboard
+            </button>
           </div>
         </div>
       </nav>
 
-      {currentPage === 'jobs' ? <JobListings /> : <CandidateApplicationForm />}
+      {currentPage === 'jobs' && <JobListings />}
+      {currentPage === 'apply' && <CandidateApplicationForm />}
+      {currentPage === 'hr-dashboard' && <HRDashboard />}
     </div>
   );
 }
