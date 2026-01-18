@@ -1,161 +1,188 @@
 ﻿"""
-Advanced AI-Powered Candidate-Job Matching Engine
-Uses multiple algorithms for comprehensive matching:
-1. Skills matching with synonyms
-2. Experience matching
-3. Education matching
-4. Location matching
-5. Semantic similarity using NLP
+AI-Powered Candidate-Job Matching Engine
+Uses multiple scoring components to calculate match scores between candidates and jobs.
 """
 
-import re
 import spacy
-from typing import Dict, List, Tuple
-from collections import Counter
-import math
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import re
+from typing import Dict, List, Tuple, Any
+
 
 class CandidateJobMatcher:
     """
-    Advanced matching engine that calculates compatibility scores
-    between candidates and job postings
+    Advanced matching engine that calculates compatibility scores between
+    candidates and job postings using multiple factors.
     """
     
     def __init__(self):
-        # Load spaCy model for semantic similarity
+        """Initialize the matcher with NLP model and configuration."""
         try:
             self.nlp = spacy.load('en_core_web_sm')
-        except:
-            import os
-            os.system('python -m spacy download en_core_web_sm')
-            self.nlp = spacy.load('en_core_web_sm')
+        except OSError:
+            print("⚠️  Warning: spaCy model not found. Run: python -m spacy download en_core_web_sm")
+            self.nlp = None
+        
+        # Scoring weights (must sum to 1.0)
+        self.weights = {
+            'skills_match': 0.40,      # 40% - Most important
+            'experience_match': 0.25,   # 25%
+            'education_match': 0.15,    # 15%
+            'location_match': 0.10,     # 10%
+            'semantic_match': 0.10,     # 10% - NLP-based similarity
+        }
         
         # Skill synonyms for better matching
         self.skill_synonyms = {
-            'javascript': ['js', 'javascript', 'es6', 'ecmascript'],
-            'python': ['python', 'python3', 'py'],
+            'python': ['python', 'py', 'python3'],
+            'javascript': ['javascript', 'js', 'es6', 'ecmascript'],
             'react': ['react', 'reactjs', 'react.js'],
             'node': ['node', 'nodejs', 'node.js'],
-            'docker': ['docker', 'containerization'],
-            'kubernetes': ['kubernetes', 'k8s'],
+            'django': ['django', 'django rest framework', 'drf'],
             'postgresql': ['postgresql', 'postgres', 'psql'],
             'mongodb': ['mongodb', 'mongo'],
+            'sql': ['sql', 'mysql', 'mssql', 'sqlite'],
+            'docker': ['docker', 'containerization'],
+            'kubernetes': ['kubernetes', 'k8s'],
             'aws': ['aws', 'amazon web services'],
-            'gcp': ['gcp', 'google cloud', 'google cloud platform'],
-            'azure': ['azure', 'microsoft azure'],
             'machine learning': ['machine learning', 'ml', 'ai'],
-            'deep learning': ['deep learning', 'dl', 'neural networks'],
-            'rest api': ['rest api', 'restful', 'rest'],
-            'graphql': ['graphql', 'graph ql'],
-            'typescript': ['typescript', 'ts'],
-            'c++': ['c++', 'cpp', 'cplusplus'],
-            'c#': ['c#', 'csharp', 'c sharp'],
-        }
-        
-        # Weights for different matching components
-        self.weights = {
-            'skills_match': 0.40,        # 40% - Most important
-            'experience_match': 0.25,    # 25%
-            'education_match': 0.15,     # 15%
-            'location_match': 0.10,      # 10%
-            'semantic_match': 0.10,      # 10%
+            'deep learning': ['deep learning', 'neural networks'],
         }
     
-    def calculate_match(self, candidate_data: Dict, job_data: Dict) -> Dict:
+    def calculate_match(self, candidate_data: Dict[str, Any], 
+                       job_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Main matching function that calculates overall compatibility
+        Calculate comprehensive match score between candidate and job.
         
+        Args:
+            candidate_data: Dictionary with candidate information
+            job_data: Dictionary with job requirements
+            
         Returns:
-        {
-            'overall_score': float (0-100),
-            'skills_score': float,
-            'experience_score': float,
-            'education_score': float,
-            'location_score': float,
-            'semantic_score': float,
-            'matched_skills': list,
-            'missing_skills': list,
-            'recommendations': list,
-            'strengths': list,
-            'weaknesses': list
-        }
+            Dictionary with scores, analysis, and recommendations
         """
+        results = {
+            'overall_score': 0.0,
+            'skills_score': 0.0,
+            'experience_score': 0.0,
+            'education_score': 0.0,
+            'location_score': 0.0,
+            'semantic_score': 0.0,
+            'matched_skills': [],
+            'missing_skills': [],
+            'extra_skills': [],
+            'match_level': '',
+            'strengths': [],
+            'weaknesses': [],
+            'recommendations': []
+        }
         
-        # Calculate individual scores
+        # Calculate individual component scores
         skills_result = self._match_skills(candidate_data, job_data)
-        experience_result = self._match_experience(candidate_data, job_data)
-        education_result = self._match_education(candidate_data, job_data)
-        location_result = self._match_location(candidate_data, job_data)
-        semantic_result = self._semantic_similarity(candidate_data, job_data)
+        results['skills_score'] = skills_result['score']
+        results['matched_skills'] = skills_result['matched']
+        results['missing_skills'] = skills_result['missing']
+        results['extra_skills'] = skills_result['extra']
+        
+        results['experience_score'] = self._match_experience(candidate_data, job_data)
+        results['education_score'] = self._match_education(candidate_data, job_data)
+        results['location_score'] = self._match_location(candidate_data, job_data)
+        results['semantic_score'] = self._semantic_similarity(candidate_data, job_data)
         
         # Calculate weighted overall score
-        overall_score = (
-            skills_result['score'] * self.weights['skills_match'] +
-            experience_result['score'] * self.weights['experience_match'] +
-            education_result['score'] * self.weights['education_match'] +
-            location_result['score'] * self.weights['location_match'] +
-            semantic_result['score'] * self.weights['semantic_match']
+        results['overall_score'] = (
+            results['skills_score'] * self.weights['skills_match'] +
+            results['experience_score'] * self.weights['experience_match'] +
+            results['education_score'] * self.weights['education_match'] +
+            results['location_score'] * self.weights['location_match'] +
+            results['semantic_score'] * self.weights['semantic_match']
         )
+        
+        # Determine match level
+        results['match_level'] = self._get_match_level(results['overall_score'])
         
         # Generate insights
-        strengths = self._identify_strengths(
-            skills_result, experience_result, education_result, location_result
-        )
-        weaknesses = self._identify_weaknesses(
-            skills_result, experience_result, education_result
-        )
-        recommendations = self._generate_recommendations(weaknesses, job_data)
+        results['strengths'] = self._identify_strengths(results, candidate_data, job_data)
+        results['weaknesses'] = self._identify_weaknesses(results, candidate_data, job_data)
+        results['recommendations'] = self._generate_recommendations(results, candidate_data, job_data)
         
-        return {
-            'overall_score': round(overall_score, 2),
-            'skills_score': round(skills_result['score'], 2),
-            'experience_score': round(experience_result['score'], 2),
-            'education_score': round(education_result['score'], 2),
-            'location_score': round(location_result['score'], 2),
-            'semantic_score': round(semantic_result['score'], 2),
-            'matched_skills': skills_result['matched'],
-            'missing_skills': skills_result['missing'],
-            'extra_skills': skills_result['extra'],
-            'experience_details': experience_result['details'],
-            'education_details': education_result['details'],
-            'strengths': strengths,
-            'weaknesses': weaknesses,
-            'recommendations': recommendations,
-            'match_level': self._get_match_level(overall_score)
-        }
+        return results
     
-    def _match_skills(self, candidate: Dict, job: Dict) -> Dict:
+    def _normalize_skill(self, skill: str) -> str:
+        """Normalize skill name for better matching."""
+        skill = skill.lower().strip()
+        skill = re.sub(r'[^\w\s]', '', skill)
+        skill = re.sub(r'\s+', ' ', skill)
+        return skill
+    
+    def _are_skills_similar(self, skill1: str, skill2: str) -> bool:
+        """Check if two skills are similar using synonyms."""
+        skill1_norm = self._normalize_skill(skill1)
+        skill2_norm = self._normalize_skill(skill2)
+        
+        # Direct match
+        if skill1_norm == skill2_norm:
+            return True
+        
+        # Check synonyms
+        for base_skill, synonyms in self.skill_synonyms.items():
+            if skill1_norm in synonyms and skill2_norm in synonyms:
+                return True
+        
+        # Fuzzy match (one contains the other)
+        if skill1_norm in skill2_norm or skill2_norm in skill1_norm:
+            return True
+        
+        return False
+    
+    def _match_skills(self, candidate_data: Dict, job_data: Dict) -> Dict[str, Any]:
         """
-        Match candidate skills with job requirements
-        Handles synonyms and case-insensitive matching
+        Match candidate skills against job requirements.
+        Returns score and detailed skill analysis.
         """
+        candidate_skills = set(candidate_data.get('parsed_skills', []))
+        required_skills = set(job_data.get('parsed_required_skills', []))
+        preferred_skills = set(job_data.get('parsed_preferred_skills', []))
         
-        # Extract skills
-        candidate_skills = set(
-            skill.lower().strip() 
-            for skill in candidate.get('parsed_skills', [])
-        )
+        matched_required = []
+        matched_preferred = []
+        missing_required = []
+        missing_preferred = []
+        extra_skills = []
         
-        required_skills = set(
-            skill.lower().strip() 
-            for skill in job.get('parsed_required_skills', [])
-        )
-        
-        preferred_skills = set(
-            skill.lower().strip() 
-            for skill in job.get('parsed_preferred_skills', [])
-        )
-        
-        # Match with synonyms
-        matched_required = set()
-        matched_preferred = set()
-        
+        # Match required skills
         for req_skill in required_skills:
-            if self._is_skill_match(req_skill, candidate_skills):
-                matched_required.add(req_skill)
+            matched = False
+            for cand_skill in candidate_skills:
+                if self._are_skills_similar(req_skill, cand_skill):
+                    matched_required.append(req_skill)
+                    matched = True
+                    break
+            if not matched:
+                missing_required.append(req_skill)
         
+        # Match preferred skills
         for pref_skill in preferred_skills:
-            if self._is_skill_match(pref_skill, candidate_skills):
-                matched_preferred.add(pref_skill)
+            matched = False
+            for cand_skill in candidate_skills:
+                if self._are_skills_similar(pref_skill, cand_skill):
+                    matched_preferred.append(pref_skill)
+                    matched = True
+                    break
+            if not matched:
+                missing_preferred.append(pref_skill)
+        
+        # Find extra skills
+        all_job_skills = required_skills | preferred_skills
+        for cand_skill in candidate_skills:
+            is_extra = True
+            for job_skill in all_job_skills:
+                if self._are_skills_similar(cand_skill, job_skill):
+                    is_extra = False
+                    break
+            if is_extra:
+                extra_skills.append(cand_skill)
         
         # Calculate score
         required_match_rate = (
@@ -164,361 +191,291 @@ class CandidateJobMatcher:
         )
         
         preferred_match_rate = (
-            len(matched_preferred) / len(preferred_skills) 
+            len(matched_preferred) / len(preferred_skills)
             if preferred_skills else 0.0
         )
         
-        # Weighted score (required skills are more important)
+        # Weighted score: required skills are more important
         score = (required_match_rate * 0.8 + preferred_match_rate * 0.2) * 100
         
-        # Identify missing and extra skills
-        missing_required = required_skills - matched_required
-        missing_preferred = preferred_skills - matched_preferred
-        extra_skills = candidate_skills - required_skills - preferred_skills
-        
         return {
             'score': score,
-            'matched': list(matched_required | matched_preferred),
-            'missing': list(missing_required | missing_preferred),
-            'extra': list(extra_skills)[:10],  # Top 10 extra skills
-            'required_match_rate': required_match_rate,
-            'preferred_match_rate': preferred_match_rate
+            'matched': matched_required + matched_preferred,
+            'missing': missing_required + missing_preferred,
+            'extra': extra_skills
         }
     
-    def _is_skill_match(self, skill: str, candidate_skills: set) -> bool:
-        """Check if skill matches considering synonyms"""
-        
-        # Direct match
-        if skill in candidate_skills:
-            return True
-        
-        # Check synonyms
-        for key, synonyms in self.skill_synonyms.items():
-            if skill in synonyms:
-                for synonym in synonyms:
-                    if synonym in candidate_skills:
-                        return True
-        
-        return False
-    
-    def _match_experience(self, candidate: Dict, job: Dict) -> Dict:
+    def _match_experience(self, candidate_data: Dict, job_data: Dict) -> float:
         """
-        Match candidate experience with job requirements
+        Match candidate experience against job requirements.
+        Returns score out of 100.
         """
+        candidate_years = candidate_data.get('parsed_experience_years', 0)
+        min_required = job_data.get('parsed_min_experience', 0)
+        max_preferred = job_data.get('parsed_max_experience', 100)
         
-        candidate_years = candidate.get('parsed_experience_years', 0) or 0
-        min_required = job.get('min_experience_years', 0) or 0
-        max_required = job.get('max_experience_years', 50) or 50
-        
-        # Calculate score based on experience range
-        if candidate_years < min_required:
-            # Under-experienced (penalty based on gap)
+        if candidate_years >= min_required and candidate_years <= max_preferred:
+            return 100.0
+        elif candidate_years < min_required:
+            # Under-qualified: penalty based on gap
             gap = min_required - candidate_years
             score = max(0, 100 - (gap * 20))  # 20 points per year gap
-            status = 'under_qualified'
-        elif candidate_years > max_required:
-            # Over-experienced (slight penalty)
-            excess = candidate_years - max_required
-            score = max(70, 100 - (excess * 5))  # 5 points per year excess
-            status = 'over_qualified'
+            return score
         else:
-            # Perfect range
-            score = 100
-            status = 'perfect_match'
-        
-        return {
-            'score': score,
-            'details': {
-                'candidate_years': candidate_years,
-                'required_min': min_required,
-                'required_max': max_required,
-                'status': status
-            }
-        }
+            # Over-qualified: small penalty
+            excess = candidate_years - max_preferred
+            score = max(50, 100 - (excess * 5))  # 5 points per year excess
+            return score
     
-    def _match_education(self, candidate: Dict, job: Dict) -> Dict:
+    def _match_education(self, candidate_data: Dict, job_data: Dict) -> float:
         """
-        Match candidate education with job requirements
+        Match candidate education against job requirements.
+        Returns score out of 100.
         """
-        
-        candidate_education = candidate.get('parsed_education', [])
-        job_qualifications = job.get('parsed_qualifications', [])
-        
-        if not job_qualifications:
-            # No specific requirements
-            return {
-                'score': 100,
-                'details': {'status': 'no_requirements'}
-            }
-        
-        # Extract degree levels
-        degree_hierarchy = {
-            'phd': 5,
-            'doctorate': 5,
+        education_levels = {
+            'high school': 1,
+            'diploma': 1,
+            'associate': 2,
+            'bachelor': 3,
             'master': 4,
             'mba': 4,
-            'bachelor': 3,
-            'associate': 2,
-            'diploma': 1
+            'phd': 5,
+            'doctorate': 5
         }
+        
+        candidate_edu = candidate_data.get('parsed_education_level', '').lower()
+        required_edu = job_data.get('parsed_education_level', '').lower()
+        
+        if not required_edu:
+            return 100.0  # No requirement
         
         candidate_level = 0
-        for edu in candidate_education:
-            edu_lower = edu.lower()
-            for degree, level in degree_hierarchy.items():
-                if degree in edu_lower:
-                    candidate_level = max(candidate_level, level)
+        for edu, level in education_levels.items():
+            if edu in candidate_edu:
+                candidate_level = max(candidate_level, level)
         
         required_level = 0
-        for qual in job_qualifications:
-            qual_lower = qual.lower()
-            for degree, level in degree_hierarchy.items():
-                if degree in qual_lower:
-                    required_level = max(required_level, level)
+        for edu, level in education_levels.items():
+            if edu in required_edu:
+                required_level = max(required_level, level)
         
-        # Calculate score
         if candidate_level >= required_level:
-            score = 100
-            status = 'meets_requirements'
+            return 100.0
         elif candidate_level == required_level - 1:
-            score = 70
-            status = 'close_match'
+            return 70.0  # One level below
         else:
-            score = 40
-            status = 'below_requirements'
-        
-        return {
-            'score': score,
-            'details': {
-                'candidate_level': candidate_level,
-                'required_level': required_level,
-                'status': status
-            }
-        }
+            return 40.0  # Below requirement
     
-    def _match_location(self, candidate: Dict, job: Dict) -> Dict:
+    def _match_location(self, candidate_data: Dict, job_data: Dict) -> float:
         """
-        Match candidate location with job location
+        Match candidate location against job location.
+        Returns score out of 100.
         """
+        candidate_location = candidate_data.get('parsed_location', '').lower()
+        job_location = job_data.get('parsed_location', '').lower()
+        is_remote = job_data.get('parsed_is_remote', False)
         
-        job_remote = job.get('is_remote', False)
+        if is_remote:
+            return 100.0
         
-        # If job is remote, location doesn't matter
-        if job_remote:
-            return {
-                'score': 100,
-                'details': {'status': 'remote_position'}
-            }
+        if not job_location or not candidate_location:
+            return 50.0  # Neutral if no data
         
-        candidate_location = (candidate.get('parsed_location', '') or '').lower()
-        job_location = (job.get('location', '') or '').lower()
+        # Exact match
+        if candidate_location == job_location:
+            return 100.0
         
-        if not candidate_location or not job_location:
-            return {
-                'score': 50,
-                'details': {'status': 'unknown'}
-            }
+        # City match (if both contain the city name)
+        candidate_parts = candidate_location.split(',')
+        job_parts = job_location.split(',')
         
-        # Check for city/state match
-        if candidate_location in job_location or job_location in candidate_location:
-            score = 100
-            status = 'same_location'
-        else:
-            # Check for same state/country
-            score = 50
-            status = 'different_location'
+        for c_part in candidate_parts:
+            for j_part in job_parts:
+                if c_part.strip() in j_part.strip() or j_part.strip() in c_part.strip():
+                    return 80.0
         
-        return {
-            'score': score,
-            'details': {
-                'candidate_location': candidate_location,
-                'job_location': job_location,
-                'status': status
-            }
-        }
+        return 30.0  # Different location
     
-    def _semantic_similarity(self, candidate: Dict, job: Dict) -> Dict:
+    def _semantic_similarity(self, candidate_data: Dict, job_data: Dict) -> float:
         """
-        Calculate semantic similarity between candidate profile and job description
-        using spaCy's word vectors
+        Calculate semantic similarity between candidate profile and job description.
+        Uses NLP to understand context beyond keywords.
         """
+        if not self.nlp:
+            return 50.0  # Neutral score if spaCy not available
         
-        # Build candidate text
+        # Combine candidate text
         candidate_text = ' '.join([
-            candidate.get('professional_summary', ''),
-            ' '.join(candidate.get('parsed_skills', [])),
-            ' '.join([exp.get('description', '') for exp in candidate.get('parsed_experience', [])])
-        ])[:1000]  # Limit text length
+            candidate_data.get('parsed_summary', ''),
+            ' '.join(candidate_data.get('parsed_skills', [])),
+        ])
         
-        # Build job text
+        # Combine job text
         job_text = ' '.join([
-            job.get('description', ''),
-            job.get('requirements', ''),
-            ' '.join(job.get('parsed_required_skills', []))
-        ])[:1000]
+            job_data.get('parsed_description', ''),
+            job_data.get('parsed_responsibilities', ''),
+            ' '.join(job_data.get('parsed_required_skills', [])),
+        ])
         
-        if not candidate_text or not job_text:
-            return {'score': 50, 'details': {'status': 'insufficient_data'}}
+        if not candidate_text.strip() or not job_text.strip():
+            return 50.0
         
-        # Calculate similarity using spaCy
         try:
-            doc1 = self.nlp(candidate_text)
-            doc2 = self.nlp(job_text)
+            # Use spaCy's similarity (based on word vectors)
+            doc1 = self.nlp(candidate_text[:1000000])  # Limit to 1M chars
+            doc2 = self.nlp(job_text[:1000000])
             similarity = doc1.similarity(doc2)
-            score = similarity * 100
-        except:
-            score = 50
-        
-        return {
-            'score': score,
-            'details': {'similarity': similarity if 'similarity' in locals() else 0.5}
-        }
+            
+            # Convert to percentage (similarity is 0-1)
+            return similarity * 100
+        except Exception as e:
+            print(f"Semantic similarity error: {e}")
+            return 50.0
     
-    def _identify_strengths(self, skills_result, experience_result, 
-                           education_result, location_result) -> List[str]:
-        """Identify candidate's strengths for this position"""
-        
+    def _get_match_level(self, score: float) -> str:
+        """Convert numeric score to match level category."""
+        if score >= 90:
+            return "Excellent Match"
+        elif score >= 75:
+            return "Great Match"
+        elif score >= 60:
+            return "Good Match"
+        elif score >= 45:
+            return "Fair Match"
+        else:
+            return "Poor Match"
+    
+    def _identify_strengths(self, results: Dict, candidate_data: Dict, 
+                           job_data: Dict) -> List[str]:
+        """Identify candidate's key strengths for this position."""
         strengths = []
         
-        if skills_result['score'] >= 80:
-            strengths.append(
-                f"Excellent skill match with {len(skills_result['matched'])} "
-                f"matching skills"
-            )
+        if results['skills_score'] >= 80:
+            strengths.append(f"Strong skills match ({len(results['matched_skills'])} matched skills)")
         
-        if experience_result['details']['status'] == 'perfect_match':
-            strengths.append(
-                f"Perfect experience level: {experience_result['details']['candidate_years']} years"
-            )
+        if results['experience_score'] >= 90:
+            candidate_years = candidate_data.get('parsed_experience_years', 0)
+            strengths.append(f"Excellent experience match ({candidate_years} years)")
         
-        if education_result['score'] >= 90:
-            strengths.append("Educational qualifications meet or exceed requirements")
+        if results['education_score'] == 100:
+            strengths.append("Meets education requirements")
         
-        if location_result['score'] == 100:
-            status = location_result['details']['status']
-            if status == 'remote_position':
-                strengths.append("Position offers remote work flexibility")
-            else:
-                strengths.append("Candidate is in the same location as job")
+        if results['location_score'] >= 80:
+            strengths.append("Location compatible")
         
-        if skills_result.get('extra'):
-            strengths.append(
-                f"Additional valuable skills: {', '.join(skills_result['extra'][:3])}"
-            )
+        if len(results['extra_skills']) > 3:
+            strengths.append(f"Additional valuable skills ({len(results['extra_skills'])} extra skills)")
         
         return strengths
     
-    def _identify_weaknesses(self, skills_result, experience_result, 
-                            education_result) -> List[str]:
-        """Identify areas where candidate may fall short"""
-        
+    def _identify_weaknesses(self, results: Dict, candidate_data: Dict,
+                            job_data: Dict) -> List[str]:
+        """Identify areas where candidate may need improvement."""
         weaknesses = []
         
-        if skills_result['score'] < 60:
-            missing_count = len(skills_result['missing'])
-            weaknesses.append(
-                f"Missing {missing_count} required/preferred skills"
-            )
+        if results['skills_score'] < 60:
+            weaknesses.append(f"Missing {len(results['missing_skills'])} key skills")
         
-        if experience_result['details']['status'] == 'under_qualified':
-            gap = (experience_result['details']['required_min'] - 
-                   experience_result['details']['candidate_years'])
-            weaknesses.append(
-                f"Below minimum experience requirement by {gap} years"
-            )
+        if results['experience_score'] < 50:
+            candidate_years = candidate_data.get('parsed_experience_years', 0)
+            min_required = job_data.get('parsed_min_experience', 0)
+            gap = min_required - candidate_years
+            if gap > 0:
+                weaknesses.append(f"Experience gap of {gap} years")
         
-        if education_result['details']['status'] == 'below_requirements':
-            weaknesses.append("Educational qualifications below job requirements")
+        if results['education_score'] < 70:
+            weaknesses.append("Education level below preferred")
+        
+        if results['location_score'] < 50:
+            weaknesses.append("Location may require relocation")
         
         return weaknesses
     
-    def _generate_recommendations(self, weaknesses: List[str], 
+    def _generate_recommendations(self, results: Dict, candidate_data: Dict,
                                  job_data: Dict) -> List[str]:
-        """Generate recommendations for improving match"""
-        
+        """Generate actionable recommendations."""
         recommendations = []
         
-        if not weaknesses:
-            recommendations.append("Strong candidate! Consider for immediate interview.")
-            return recommendations
+        if results['overall_score'] >= 75:
+            recommendations.append("✅ Strong candidate - proceed to interview")
+        elif results['overall_score'] >= 60:
+            recommendations.append("👍 Good candidate - consider for shortlist")
+        else:
+            recommendations.append("💡 Review carefully - may need development")
         
-        for weakness in weaknesses:
-            if 'skills' in weakness.lower():
-                recommendations.append(
-                    "Consider training or certification programs to acquire missing skills"
-                )
-            elif 'experience' in weakness.lower():
-                recommendations.append(
-                    "Highlight relevant projects or internships that demonstrate capability"
-                )
-            elif 'education' in weakness.lower():
-                recommendations.append(
-                    "Consider pursuing relevant degree or certifications"
-                )
+        if results['missing_skills']:
+            top_missing = results['missing_skills'][:3]
+            recommendations.append(f"Skills to develop: {', '.join(top_missing)}")
+        
+        if results['experience_score'] < 70:
+            recommendations.append("Consider offering training/mentorship program")
+        
+        if results['location_score'] < 70 and not job_data.get('parsed_is_remote'):
+            recommendations.append("Discuss remote work or relocation support")
         
         return recommendations
-    
-    def _get_match_level(self, score: float) -> str:
-        """Categorize match quality"""
-        
-        if score >= 90:
-            return 'Excellent Match'
-        elif score >= 75:
-            return 'Great Match'
-        elif score >= 60:
-            return 'Good Match'
-        elif score >= 45:
-            return 'Fair Match'
-        else:
-            return 'Poor Match'
 
 
-def test_matcher():
-    """Test the matching engine"""
-    
-    matcher = CandidateJobMatcher()
-    
-    # Sample candidate
-    candidate = {
-        'parsed_skills': ['Python', 'Django', 'React', 'PostgreSQL', 'Docker', 'AWS'],
+# Test the matcher
+if __name__ == "__main__":
+    # Sample data for testing
+    sample_candidate = {
+        'parsed_skills': ['Python', 'Django', 'React', 'PostgreSQL', 'Docker'],
         'parsed_experience_years': 5,
-        'parsed_education': ['Bachelor of Science in Computer Science'],
-        'parsed_location': 'San Francisco, CA',
-        'professional_summary': 'Experienced full-stack developer with expertise in Python and JavaScript'
+        'parsed_education_level': 'Bachelor in Computer Science',
+        'parsed_location': 'Lahore, Pakistan',
+        'parsed_summary': 'Experienced full-stack developer with expertise in Python and React'
     }
     
-    # Sample job
-    job = {
+    sample_job = {
         'parsed_required_skills': ['Python', 'Django', 'React', 'PostgreSQL'],
         'parsed_preferred_skills': ['Docker', 'Kubernetes', 'AWS'],
-        'min_experience_years': 3,
-        'max_experience_years': 7,
-        'parsed_qualifications': ['Bachelor degree in Computer Science'],
-        'location': 'San Francisco, CA',
-        'is_remote': False,
-        'description': 'Looking for a full-stack developer to build web applications'
+        'parsed_min_experience': 3,
+        'parsed_max_experience': 7,
+        'parsed_education_level': 'Bachelor',
+        'parsed_location': 'Lahore, Pakistan',
+        'parsed_is_remote': False,
+        'parsed_description': 'Looking for a full-stack developer to build web applications',
+        'parsed_responsibilities': 'Develop and maintain Django backend and React frontend'
     }
     
-    result = matcher.calculate_match(candidate, job)
+    # Create matcher and calculate
+    matcher = CandidateJobMatcher()
+    result = matcher.calculate_match(sample_candidate, sample_job)
     
-    print("=== MATCHING RESULTS ===")
-    print(f"Overall Score: {result['overall_score']}%")
-    print(f"Match Level: {result['match_level']}")
-    print(f"\nDetailed Scores:")
-    print(f"  Skills: {result['skills_score']}%")
-    print(f"  Experience: {result['experience_score']}%")
-    print(f"  Education: {result['education_score']}%")
-    print(f"  Location: {result['location_score']}%")
-    print(f"  Semantic: {result['semantic_score']}%")
-    print(f"\nMatched Skills: {result['matched_skills']}")
-    print(f"Missing Skills: {result['missing_skills']}")
-    print(f"\nStrengths:")
+    # Print results
+    print("\n" + "="*50)
+    print("MATCHING RESULTS")
+    print("="*50)
+    print(f"\n📊 Overall Score: {result['overall_score']:.1f}%")
+    print(f"🎯 Match Level: {result['match_level']}\n")
+    
+    print("Detailed Scores:")
+    print(f"  Skills:    {result['skills_score']:.1f}%")
+    print(f"  Experience: {result['experience_score']:.1f}%")
+    print(f"  Education:  {result['education_score']:.1f}%")
+    print(f"  Location:   {result['location_score']:.1f}%")
+    print(f"  Semantic:   {result['semantic_score']:.1f}%")
+    
+    print(f"\n✅ Matched Skills ({len(result['matched_skills'])}):")
+    print(f"  {', '.join(result['matched_skills'])}")
+    
+    print(f"\n❌ Missing Skills ({len(result['missing_skills'])}):")
+    print(f"  {', '.join(result['missing_skills']) if result['missing_skills'] else 'None'}")
+    
+    print(f"\n➕ Extra Skills ({len(result['extra_skills'])}):")
+    print(f"  {', '.join(result['extra_skills']) if result['extra_skills'] else 'None'}")
+    
+    print(f"\n💪 Strengths:")
     for strength in result['strengths']:
         print(f"  • {strength}")
-    print(f"\nWeaknesses:")
+    
+    print(f"\n⚠️  Weaknesses:")
     for weakness in result['weaknesses']:
         print(f"  • {weakness}")
-
-
-if __name__ == '__main__':
-    test_matcher()
+    
+    print(f"\n💡 Recommendations:")
+    for rec in result['recommendations']:
+        print(f"  • {rec}")
+    
+    print("\n" + "="*50)

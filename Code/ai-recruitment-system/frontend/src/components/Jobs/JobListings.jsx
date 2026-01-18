@@ -5,379 +5,273 @@ import './JobListings.css';
 const JobListings = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [showApplicationModal, setShowApplicationModal] = useState(false);
-  
-  // Filters
   const [filters, setFilters] = useState({
-    search: '',
-    employment_type: '',
-    is_remote: '',
+    job_type: '',
+    experience_level: '',
     location: '',
-    status: 'active'
+    search: ''
   });
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
   useEffect(() => {
     fetchJobs();
-  }, [filters]);
+  }, []);
 
   const fetchJobs = async () => {
     try {
-      setLoading(true);
-      
-      // Build query parameters
-      const params = new URLSearchParams();
-      Object.keys(filters).forEach(key => {
-        if (filters[key]) {
-          params.append(key, filters[key]);
-        }
-      });
-      
-      const response = await axios.get(`${API_URL}/jobs/?${params.toString()}`);
-      setJobs(response.data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-      setError('Failed to load jobs. Please try again.');
-    } finally {
+      const response = await axios.get('http://localhost:8000/api/jobs/');
+      setJobs(response.data.filter(job => job.status === 'active'));
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
       setLoading(false);
     }
   };
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const clearFilters = () => {
     setFilters({
-      search: '',
-      employment_type: '',
-      is_remote: '',
-      location: '',
-      status: 'active'
+      ...filters,
+      [e.target.name]: e.target.value
     });
   };
 
-  const viewJobDetails = async (jobId) => {
-    try {
-      const response = await axios.get(`${API_URL}/jobs/${jobId}/`);
-      setSelectedJob(response.data);
-    } catch (err) {
-      console.error('Error fetching job details:', err);
-      alert('Failed to load job details');
-    }
+  const filteredJobs = jobs.filter(job => {
+    const matchesType = !filters.job_type || job.job_type === filters.job_type;
+    const matchesLevel = !filters.experience_level || job.experience_level === filters.experience_level;
+    const matchesLocation = !filters.location || job.location.toLowerCase().includes(filters.location.toLowerCase());
+    const matchesSearch = !filters.search || 
+      job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+      job.company.toLowerCase().includes(filters.search.toLowerCase());
+
+    return matchesType && matchesLevel && matchesLocation && matchesSearch;
+  });
+
+  const formatSalary = (min, max) => {
+    if (!min && !max) return 'Competitive';
+    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+    if (min) return `$${min.toLocaleString()}+`;
+    return 'Negotiable';
   };
 
-  const applyToJob = (job) => {
-    setSelectedJob(job);
-    setShowApplicationModal(true);
+  const getExperienceLabel = (level) => {
+    const labels = {
+      'entry': 'Entry Level',
+      'mid': 'Mid Level',
+      'senior': 'Senior Level',
+      'lead': 'Lead/Principal'
+    };
+    return labels[level] || level;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'No deadline';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+  const getJobTypeLabel = (type) => {
+    const labels = {
+      'full-time': 'Full-time',
+      'part-time': 'Part-time',
+      'contract': 'Contract',
+      'internship': 'Internship'
+    };
+    return labels[type] || type;
   };
 
   if (loading) {
     return (
-      <div className="job-listings-container">
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Loading jobs...</p>
-        </div>
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading jobs...</p>
       </div>
     );
   }
 
   return (
     <div className="job-listings-container">
-      <header className="listings-header">
-        <h1>🚀 Available Positions</h1>
-        <p>Find your dream job from {jobs.length} available positions</p>
-      </header>
+      <div className="listings-header">
+        <h2>🔍 Browse Available Jobs</h2>
+        <p>Find your perfect match from {jobs.length} active positions</p>
+      </div>
 
-      {/* Filters Section */}
+      {/* Filters */}
       <div className="filters-section">
-        <div className="filter-group">
+        <div className="search-box">
           <input
             type="text"
             name="search"
-            placeholder="Search jobs, companies..."
+            placeholder="🔎 Search by job title or company..."
             value={filters.search}
             onChange={handleFilterChange}
-            className="filter-input search-input"
           />
         </div>
 
-        <div className="filter-group">
-          <select
-            name="employment_type"
-            value={filters.employment_type}
-            onChange={handleFilterChange}
-            className="filter-select"
-          >
-            <option value="">All Types</option>
-            <option value="full_time">Full-time</option>
-            <option value="part_time">Part-time</option>
+        <div className="filter-row">
+          <select name="job_type" value={filters.job_type} onChange={handleFilterChange}>
+            <option value="">All Job Types</option>
+            <option value="full-time">Full-time</option>
+            <option value="part-time">Part-time</option>
             <option value="contract">Contract</option>
             <option value="internship">Internship</option>
-            <option value="temporary">Temporary</option>
           </select>
-        </div>
 
-        <div className="filter-group">
-          <select
-            name="is_remote"
-            value={filters.is_remote}
-            onChange={handleFilterChange}
-            className="filter-select"
-          >
-            <option value="">All Locations</option>
-            <option value="true">Remote Only</option>
-            <option value="false">On-site Only</option>
+          <select name="experience_level" value={filters.experience_level} onChange={handleFilterChange}>
+            <option value="">All Experience Levels</option>
+            <option value="entry">Entry Level</option>
+            <option value="mid">Mid Level</option>
+            <option value="senior">Senior Level</option>
+            <option value="lead">Lead/Principal</option>
           </select>
-        </div>
 
-        <div className="filter-group">
           <input
             type="text"
             name="location"
-            placeholder="Location..."
+            placeholder="Location"
             value={filters.location}
             onChange={handleFilterChange}
-            className="filter-input"
           />
         </div>
 
-        <button onClick={clearFilters} className="clear-filters-btn">
-          Clear Filters
-        </button>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
-
-      {/* Jobs Grid */}
-      <div className="jobs-grid">
-        {jobs.length === 0 ? (
-          <div className="no-jobs">
-            <h3>No jobs found</h3>
-            <p>Try adjusting your filters or check back later!</p>
-          </div>
-        ) : (
-          jobs.map(job => (
-            <div key={job.id} className="job-card">
-              <div className="job-card-header">
-                <div className="job-title-section">
-                  <h3>{job.title}</h3>
-                  <p className="company-name">{job.company_name}</p>
-                </div>
-                <div className="job-badges">
-                  {job.is_remote && (
-                    <span className="badge badge-remote">🌍 Remote</span>
-                  )}
-                  <span className="badge badge-type">
-                    {job.employment_type.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-
-              <div className="job-meta">
-                <div className="meta-item">
-                  <span className="meta-icon">📍</span>
-                  <span>{job.location}</span>
-                </div>
-                <div className="meta-item">
-                  <span className="meta-icon">💼</span>
-                  <span>{job.experience_range_display}</span>
-                </div>
-                {job.salary_range_display !== 'Not specified' && (
-                  <div className="meta-item">
-                    <span className="meta-icon">💰</span>
-                    <span>{job.salary_range_display}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="job-stats">
-                <span className="stat-item">
-                  👁️ {job.view_count} views
-                </span>
-                <span className="stat-item">
-                  📝 {job.application_count} applicants
-                </span>
-              </div>
-
-              {job.application_deadline && (
-                <div className="deadline">
-                  ⏰ Deadline: {formatDate(job.application_deadline)}
-                </div>
-              )}
-
-              <div className="job-actions">
-                <button 
-                  onClick={() => viewJobDetails(job.id)}
-                  className="btn-secondary"
-                >
-                  View Details
-                </button>
-                <button 
-                  onClick={() => applyToJob(job)}
-                  className="btn-primary"
-                  disabled={!job.is_active}
-                >
-                  {job.is_active ? 'Apply Now' : 'Position Closed'}
-                </button>
-              </div>
-            </div>
-          ))
+        {(filters.job_type || filters.experience_level || filters.location || filters.search) && (
+          <button 
+            className="clear-filters"
+            onClick={() => setFilters({ job_type: '', experience_level: '', location: '', search: '' })}
+          >
+            Clear Filters
+          </button>
         )}
       </div>
 
-      {/* Job Details Modal */}
-      {selectedJob && !showApplicationModal && (
-        <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedJob(null)}>
-              ×
-            </button>
-            
-            <div className="job-details">
-              <h2>{selectedJob.title}</h2>
-              <h3>{selectedJob.company_name}</h3>
-              
-              <div className="job-details-meta">
-                <span>📍 {selectedJob.location}</span>
-                <span>💼 {selectedJob.experience_range_display}</span>
-                <span>🏢 {selectedJob.employment_type.replace('_', ' ')}</span>
-                {selectedJob.is_remote && <span>🌍 Remote</span>}
+      {/* Results Count */}
+      <div className="results-info">
+        Showing {filteredJobs.length} of {jobs.length} jobs
+      </div>
+
+      {/* Job Cards */}
+      <div className="jobs-grid">
+        {filteredJobs.map(job => (
+          <div key={job.id} className="job-card" onClick={() => setSelectedJob(job)}>
+            <div className="job-card-header">
+              <div>
+                <h3>{job.title}</h3>
+                <p className="company">{job.company}</p>
               </div>
-
-              {selectedJob.salary_range_display !== 'Not specified' && (
-                <div className="salary-info">
-                  <strong>💰 Salary:</strong> {selectedJob.salary_range_display}
-                </div>
-              )}
-
-              <div className="job-section">
-                <h4>Job Description</h4>
-                <p>{selectedJob.description}</p>
-              </div>
-
-              {selectedJob.parsed_required_skills && selectedJob.parsed_required_skills.length > 0 && (
-                <div className="job-section">
-                  <h4>Required Skills</h4>
-                  <div className="skills-tags">
-                    {selectedJob.parsed_required_skills.map((skill, idx) => (
-                      <span key={idx} className="skill-tag">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedJob.parsed_preferred_skills && selectedJob.parsed_preferred_skills.length > 0 && (
-                <div className="job-section">
-                  <h4>Preferred Skills</h4>
-                  <div className="skills-tags">
-                    {selectedJob.parsed_preferred_skills.map((skill, idx) => (
-                      <span key={idx} className="skill-tag skill-tag-preferred">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedJob.parsed_responsibilities && selectedJob.parsed_responsibilities.length > 0 && (
-                <div className="job-section">
-                  <h4>Responsibilities</h4>
-                  <ul>
-                    {selectedJob.parsed_responsibilities.map((resp, idx) => (
-                      <li key={idx}>{resp}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {selectedJob.parsed_qualifications && selectedJob.parsed_qualifications.length > 0 && (
-                <div className="job-section">
-                  <h4>Qualifications</h4>
-                  <ul>
-                    {selectedJob.parsed_qualifications.map((qual, idx) => (
-                      <li key={idx}>{qual}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {selectedJob.parsed_benefits && selectedJob.parsed_benefits.length > 0 && (
-                <div className="job-section">
-                  <h4>Benefits</h4>
-                  <div className="benefits-tags">
-                    {selectedJob.parsed_benefits.map((benefit, idx) => (
-                      <span key={idx} className="benefit-tag">{benefit}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="modal-actions">
-                <button 
-                  onClick={() => {
-                    setShowApplicationModal(true);
-                  }}
-                  className="btn-primary btn-large"
-                  disabled={!selectedJob.is_active}
-                >
-                  {selectedJob.is_active ? 'Apply for this Position' : 'Position Closed'}
-                </button>
-              </div>
+              {job.is_remote && <span className="remote-badge">🌐 Remote</span>}
             </div>
+
+            <div className="job-meta">
+              <span className="meta-item">
+                📍 {job.location}
+              </span>
+              <span className="meta-item">
+                💼 {getJobTypeLabel(job.job_type)}
+              </span>
+              <span className="meta-item">
+                📊 {getExperienceLabel(job.experience_level)}
+              </span>
+            </div>
+
+            <div className="job-salary">
+              💰 {formatSalary(job.salary_min, job.salary_max)}
+            </div>
+
+            {job.parsed_required_skills && job.parsed_required_skills.length > 0 && (
+              <div className="job-skills">
+                {job.parsed_required_skills.slice(0, 5).map((skill, idx) => (
+                  <span key={idx} className="skill-tag">{skill}</span>
+                ))}
+                {job.parsed_required_skills.length > 5 && (
+                  <span className="skill-tag more">+{job.parsed_required_skills.length - 5} more</span>
+                )}
+              </div>
+            )}
+
+            <button className="view-details-btn">
+              View Details →
+            </button>
           </div>
+        ))}
+      </div>
+
+      {filteredJobs.length === 0 && (
+        <div className="no-results">
+          <p>😔 No jobs found matching your criteria</p>
+          <button onClick={() => setFilters({ job_type: '', experience_level: '', location: '', search: '' })}>
+            Clear Filters
+          </button>
         </div>
       )}
 
-      {/* Application Modal */}
-      {showApplicationModal && (
-        <div className="modal-overlay" onClick={() => setShowApplicationModal(false)}>
+      {/* Job Details Modal */}
+      {selectedJob && (
+        <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowApplicationModal(false)}>
-              ×
+            <button className="close-modal" onClick={() => setSelectedJob(null)}>
+              ✕
             </button>
-            
-            <div className="application-info">
-              <h2>Apply to {selectedJob.title}</h2>
-              <p>To complete your application, please:</p>
-              <ol>
-                <li>Go to the Candidate Application page</li>
-                <li>Submit your resume and details</li>
-                <li>Your profile will be automatically matched with this position</li>
-              </ol>
-              
-              <div className="info-note">
-                <strong>Note:</strong> Module 3 (AI Matching) will automatically calculate 
-                your compatibility score with this position once you submit your application.
-              </div>
 
-              <button 
-                onClick={() => window.location.href = '/apply'}
-                className="btn-primary btn-large"
-              >
-                Go to Application Page
+            <div className="modal-header">
+              <h2>{selectedJob.title}</h2>
+              <p className="modal-company">{selectedJob.company}</p>
+            </div>
+
+            <div className="modal-meta">
+              <span>📍 {selectedJob.location}</span>
+              <span>💼 {getJobTypeLabel(selectedJob.job_type)}</span>
+              <span>📊 {getExperienceLabel(selectedJob.experience_level)}</span>
+              {selectedJob.is_remote && <span>🌐 Remote</span>}
+            </div>
+
+            <div className="modal-salary">
+              <strong>Salary:</strong> {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
+            </div>
+
+            <div className="modal-section">
+              <h3>📝 Description</h3>
+              <p>{selectedJob.description}</p>
+            </div>
+
+            {selectedJob.parsed_required_skills && selectedJob.parsed_required_skills.length > 0 && (
+              <div className="modal-section">
+                <h3>🔧 Required Skills</h3>
+                <div className="skills-list">
+                  {selectedJob.parsed_required_skills.map((skill, idx) => (
+                    <span key={idx} className="skill-tag-large">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedJob.parsed_preferred_skills && selectedJob.parsed_preferred_skills.length > 0 && (
+              <div className="modal-section">
+                <h3>⭐ Preferred Skills</h3>
+                <div className="skills-list">
+                  {selectedJob.parsed_preferred_skills.map((skill, idx) => (
+                    <span key={idx} className="skill-tag-large preferred">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedJob.requirements && (
+              <div className="modal-section">
+                <h3>📋 Requirements</h3>
+                <p className="preserve-whitespace">{selectedJob.requirements}</p>
+              </div>
+            )}
+
+            {selectedJob.responsibilities && (
+              <div className="modal-section">
+                <h3>💼 Responsibilities</h3>
+                <p className="preserve-whitespace">{selectedJob.responsibilities}</p>
+              </div>
+            )}
+
+            {selectedJob.benefits && (
+              <div className="modal-section">
+                <h3>🎁 Benefits</h3>
+                <p className="preserve-whitespace">{selectedJob.benefits}</p>
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="apply-btn">
+                Apply for this Position
               </button>
             </div>
           </div>

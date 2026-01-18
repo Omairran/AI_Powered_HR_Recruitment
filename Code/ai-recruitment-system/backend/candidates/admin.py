@@ -1,70 +1,29 @@
-"""
-Django Admin configuration for Candidate model.
-"""
 from django.contrib import admin
-from .models import Candidate
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import User, Candidate
+
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    list_display = ['username', 'email', 'user_type', 'first_name', 'last_name', 'is_staff']
+    list_filter = ['user_type', 'is_staff', 'is_active']
+    
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ('Additional Info', {
+            'fields': ('user_type', 'phone', 'company')
+        }),
+    )
+    
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        ('Additional Info', {
+            'fields': ('user_type', 'phone', 'company')
+        }),
+    )
 
 
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
-    """
-    Admin interface for managing candidates.
-    """
-    list_display = [
-        'full_name',
-        'email',
-        'phone',
-        'application_status',
-        'created_at',
-        'has_parsed_data',
-    ]
-    list_filter = [
-        'application_status',
-        'created_at',
-    ]
-    search_fields = [
-        'full_name',
-        'email',
-        'phone',
-        'parsed_skills',
-    ]
-    readonly_fields = [
-        'created_at',
-        'updated_at',
-        'parsed_text',
-        'parsed_email',
-        'parsed_phone',
-        'parsed_skills',
-    ]
-    fieldsets = (
-        ('Personal Information', {
-            'fields': ('full_name', 'email', 'phone')
-        }),
-        ('Resume', {
-            'fields': ('resume',)
-        }),
-        ('Parsed Data', {
-            'fields': (
-                'parsed_text',
-                'parsed_email',
-                'parsed_phone',
-                'parsed_skills',
-            ),
-            'classes': ('collapse',)
-        }),
-        ('Application Status', {
-            'fields': ('application_status',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def has_parsed_data(self, obj):
-        """Display whether resume has been parsed."""
-        return bool(obj.parsed_text)
-    has_parsed_data.boolean = True
-    has_parsed_data.short_description = 'Parsed'
-    
-    ordering = ['-created_at']
+    list_display = ['name', 'email', 'phone', 'parsed_experience_years', 'created_at']
+    search_fields = ['name', 'email']
+    list_filter = ['parsed_education_level', 'created_at']
+    readonly_fields = ['created_at', 'updated_at']

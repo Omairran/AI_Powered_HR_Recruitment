@@ -1,332 +1,414 @@
-"""
-Enhanced API Views with improved resume parsing.
-"""
-from rest_framework import status, generics
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.db import transaction
+from rest_framework.permissions import AllowAny
 from .models import Candidate
-from .serializers import (
-    CandidateSerializer,
-    CandidateListSerializer,
-    CandidateCreateSerializer
-)
-#from .utils.resume_parser import PakistanResumeParser
-from .utils.resume_parser import EnhancedResumeParser
-#from .utils.resume_parser import AdvancedResumeParser as EnhancedResumeParser
+from .serializers import CandidateSerializer
+import PyPDF2
+import docx
+import io
+import re
 
 
-class CandidateApplicationView(generics.CreateAPIView):
-    """
-    POST /api/candidates/apply/
-    Enhanced application endpoint with comprehensive resume parsing.
-    Allows candidates to reapply/update by checking email first.
-    """
+class CandidateViewSet(viewsets.ModelViewSet):
     queryset = Candidate.objects.all()
-    serializer_class = CandidateCreateSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = CandidateSerializer
+    permission_classes = [AllowAny]  # Allow unauthenticated access for now
     
-    @transaction.atomic
-    def create(self, request, *args, **kwargs):
-        """
-        Handle candidate application with enhanced parsing.
-        If email exists, update that record instead of creating new one.
-        """
-        email = request.data.get('email', '').lower()
-        
-        # Check if candidate already exists
-        existing_candidate = None
-        if email:
+    def extract_text_from_pdf(self, file):
+        """Extract text from PDF file using pdfminer for better accuracy."""
+        try:
+            from pdfminer.high_level import extract_text
+            # Create a temporary file because pdfminer expects a path or file-like object
+            # For InMemoryUploadedFile, we might need to write it to disk or use BytesIO
+            import tempfile
+            import os
+            
+            # Save to temp file
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp:
+                for chunk in file.chunks():
+                    temp.write(chunk)
+                temp_path = temp.name
+            
+            text = extract_text(temp_path)
+            
+            # Cleanup
+            os.unlink(temp_path)
+            return text
+        except Exception as e:
+            print(f"Error extracting PDF with pdfminer: {e}")
+            # Fallback to PyPDF2
             try:
-                existing_candidate = Candidate.objects.get(email=email)
-                print(f"✓ Found existing candidate with email: {email}")
-            except Candidate.DoesNotExist:
-                print(f"→ New candidate with email: {email}")
+                file.seek(0)
+                pdf_reader = PyPDF2.PdfReader(file)
+                text = ""
+                for page in pdf_reader.pages:
+                    text += page.extract_text() + "\n"
+                return text
+            except Exception as e2:
+                print(f"Error extracting PDF with PyPDF2: {e2}")
+                return ""
+
+    def extract_text_from_docx(self, file):
+        """Extract text from DOCX file."""
+        try:
+            doc = docx.Document(file)
+            text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            return text
+        except Exception as e:
+            print(f"Error extracting DOCX: {e}")
+            return ""
+    
+    def extract_text_from_txt(self, file):
+        """Extract text from TXT file."""
+        try:
+            return file.read().decode('utf-8')
+        except Exception as e:
+            print(f"Error extracting TXT: {e}")
+            return ""
+    
+    def parse_resume(self, file):
+        """Parse resume and extract information."""
+        file_extension = file.name.split('.')[-1].lower()
         
-        if existing_candidate:
+        # Extract text based on file type
+        if file_extension == 'pdf':
+            text = self.extract_text_from_pdf(file)
+        elif file_extension in ['docx', 'doc']:
+            text = self.extract_text_from_docx(file)
+        elif file_extension == 'txt':
+            text = self.extract_text_from_txt(file)
+        else:
+            return {
+                'parsed_text': '',
+                'parsed_skills': [],
+                'parsed_experience_years': 0,
+                'parsed_education_level': '',
+                'parsed_location': '',
+                'parsed_summary': '',
+                'parsed_linkedin': '',
+                'parsed_github': '',
+                'parsed_portfolio': '',
+                'parsing_status': 'failed',
+                'parsing_error': f'Unsupported file type: {file_extension}'
+            }
+        
+        # Enhanced Parsing Logic
+        parsed_data = {
+            'parsed_text': text,
+            'parsed_skills': self.extract_skills(text),
+            'parsed_experience_years': self.extract_experience(text),
+            'parsed_education_level': self.extract_education(text),
+            'parsed_location': self.extract_location(text),
+            'parsed_summary': text[:500] if text else '',
+            'parsing_status': 'success' if text else 'failed',
+            'parsing_error': None if text else 'No text extracted from file'
+        }
+        
+        # Extract Links
+        links = self.extract_links(text)
+        parsed_data.update(links)
+        
+        return parsed_data
+    
+    def extract_links(self, text):
+        """Extract social links from text."""
+        links = {
+            'parsed_linkedin': '',
+            'parsed_github': '',
+            'parsed_portfolio': ''
+        }
+        
+        # LinkedIn
+        linkedin_pattern = r'(?:https?://)?(?:www\.)?linkedin\.com/in/([a-zA-Z0-9\-\_]+)/?'
+        linkedin_match = re.search(linkedin_pattern, text, re.IGNORECASE)
+        if linkedin_match:
+            links['parsed_linkedin'] = f"https://www.linkedin.com/in/{linkedin_match.group(1)}"
+            
+        # GitHub
+        github_pattern = r'(?:https?://)?(?:www\.)?github\.com/([a-zA-Z0-9\-\_]+)/?'
+        github_match = re.search(github_pattern, text, re.IGNORECASE)
+        if github_match:
+            links['parsed_github'] = f"https://github.com/{github_match.group(1)}"
+            
+        # Portfolio / Website (Generic URL)
+        # Exclude common non-portfolio domains
+        url_pattern = r'https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
+        urls = re.findall(url_pattern, text)
+        excluded_domains = ['linkedin.com', 'github.com', 'google.com', 'facebook.com', 'twitter.com', 'instagram.com']
+        
+        for url in urls:
+            is_excluded = any(domain in url for domain in excluded_domains)
+            if not is_excluded:
+                links['parsed_portfolio'] = url if url.startswith('http') else 'https://' + url
+                break
+                
+        return links
+
+    def extract_skills(self, text):
+        """Extract skills from resume text."""
+        # Expanded skill list
+        common_skills = [
+            'python', 'java', 'javascript', 'react', 'angular', 'vue',
+            'node', 'django', 'flask', 'spring', 'sql', 'mysql', 'postgresql',
+            'mongodb', 'redis', 'docker', 'kubernetes', 'aws', 'azure', 'gcp',
+            'git', 'agile', 'scrum', 'rest', 'api', 'html', 'css', 'typescript',
+            'c++', 'c#', 'php', 'ruby', 'go', 'swift', 'kotlin', 'machine learning',
+            'deep learning', 'ai', 'data science', 'tensorflow', 'pytorch',
+            'pandas', 'numpy', 'scikit-learn', 'jenkins', 'ci/cd', 'linux',
+            'figma', 'jira', 'confluence'
+        ]
+        
+        text_lower = text.lower()
+        found_skills = []
+        
+        for skill in common_skills:
+            # Word boundary check to avoid partial matches (e.g., "go" in "good")
+            if re.search(r'\b' + re.escape(skill) + r'\b', text_lower):
+                found_skills.append(skill.title())
+        
+        return list(set(found_skills))
+
+    def extract_experience(self, text):
+        """Extract years of experience from text."""
+        patterns = [
+            r'(\d+)\+?\s*years?\s*(?:of)?\s*experience',
+            r'experience[:\s]+(\d+)\+?\s*years?',
+            r'(\d+)\s*years?', # Broad fallback
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text.lower())
+            if match:
+                try:
+                    val = int(match.group(1))
+                    if 0 < val < 40: # Sanity check
+                        return val
+                except:
+                    pass
+        return 0
+    
+    def extract_education(self, text):
+        """Extract education level from text."""
+        text_lower = text.lower()
+        
+        if 'phd' in text_lower or 'doctorate' in text_lower:
+            return 'PhD'
+        elif 'master' in text_lower or 'msc' in text_lower or 'mba' in text_lower:
+            return 'Master'
+        elif 'bachelor' in text_lower or 'bsc' in text_lower or 'bs' in text_lower:
+            return 'Bachelor'
+        elif 'associate' in text_lower:
+            return 'Associate'
+        elif 'diploma' in text_lower:
+            return 'Diploma'
+        
+        return ''
+
+    def extract_location(self, text):
+        """Extract location from text."""
+        cities = ['lahore', 'karachi', 'islamabad', 'rawalpindi', 'faisalabad', 'multan', 'new york', 'london', 'remote']
+        text_lower = text.lower()
+        
+        for city in cities:
+            if re.search(r'\b' + re.escape(city) + r'\b', text_lower):
+                return city.title()
+        
+        return ''
+    
+    @action(detail=False, methods=['post'])
+    def parse_resume_only(self, request):
+        """
+        Parse resume and return data without saving.
+        Used for the "Review" step in the frontend.
+        """
+        try:
+            resume = request.FILES.get('resume')
+            if not resume:
+                return Response(
+                    {'error': 'No resume file provided'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            parsed_data = self.parse_resume(resume)
+            return Response(parsed_data)
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['post'])
+    def apply(self, request):
+        """Handle candidate application with resume upload."""
+        try:
+            # Get data
+            name = request.data.get('name')
+            email = request.data.get('email')
+            phone = request.data.get('phone', '')
+            resume = request.FILES.get('resume')
+            job_id = request.data.get('job_id')
+            
+            # Validate required fields
+            if not name or not email:
+                return Response(
+                    {'error': 'Name and email are required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check if candidate already exists
+            candidate, created = Candidate.objects.get_or_create(
+                email=email,
+                defaults={
+                    'name': name,
+                    'phone': phone,
+                }
+            )
+            
             # Update existing candidate
-            print(f"→ Updating existing candidate ID: {existing_candidate.id}")
+            if not created:
+                candidate.name = name
+                candidate.phone = phone
             
-            # Update basic fields
-            existing_candidate.full_name = request.data.get('full_name', existing_candidate.full_name)
-            if 'phone' in request.data:
-                existing_candidate.phone = request.data.get('phone')
+            # 1. Handle Resume & Parsing
+            parsed_data = {}
             
-            # Update resume if new one uploaded
-            if 'resume' in request.FILES:
-                # Delete old resume
-                if existing_candidate.resume:
-                    existing_candidate.resume.delete(save=False)
-                existing_candidate.resume = request.FILES['resume']
+            # If resume file is provided, we might parse it OR rely on user-reviewed data
+            if resume:
+                candidate.resume = resume
+                # We do a fresh parse just to have the "raw" data or file processing
+                # But we will PREFER the data sent in the request (user reviewed data)
+                raw_parsed_data = self.parse_resume(resume)
+                parsed_data.update(raw_parsed_data)
             
-            existing_candidate.save()
-            candidate = existing_candidate
+            # 2. Override with User-Reviewed Data (from request.data)
+            # This allows the user to correct the AI's mistakes
+            reviewed_skills = request.data.get('parsed_skills')
+            reviewed_experience = request.data.get('parsed_experience_years')
+            reviewed_education = request.data.get('parsed_education_level')
+            reviewed_location = request.data.get('parsed_location')
+            reviewed_summary = request.data.get('parsed_summary')
+
+            # Handle comma-separated skills string if that's what's sent
+            if reviewed_skills is not None:
+                if isinstance(reviewed_skills, str):
+                    # If sent as string "Python, Django"
+                    parsed_data['parsed_skills'] = [s.strip() for s in reviewed_skills.split(',') if s.strip()]
+                else:
+                    # If sent as list (when using JSON content type, though this is FormData)
+                    parsed_data['parsed_skills'] = reviewed_skills
+
+            if reviewed_experience is not None:
+                try:
+                    if str(reviewed_experience).strip():
+                        parsed_data['parsed_experience_years'] = float(reviewed_experience)
+                    else:
+                        parsed_data['parsed_experience_years'] = 0.0
+                except (ValueError, TypeError):
+                    parsed_data['parsed_experience_years'] = 0.0
+
+            if reviewed_education is not None:
+                parsed_data['parsed_education_level'] = reviewed_education
             
-        else:
-            # Create new candidate
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            candidate = serializer.save()
-        
-        # Parse resume with enhanced parser
-        try:
-            parser = EnhancedResumeParser()
-            resume_path = candidate.resume.path
-            parsed_data = parser.parse(resume_path)
-            
-            # Update candidate with all parsed data
-            candidate.parsed_text = parsed_data.get('text', '')
-            candidate.parsed_name = parsed_data.get('name')
-            candidate.parsed_email = parsed_data.get('email')
-            candidate.parsed_phone = parsed_data.get('phone')
-            
+            if reviewed_location is not None:
+                parsed_data['parsed_location'] = reviewed_location
+                
+            if reviewed_summary is not None:
+                parsed_data['parsed_summary'] = reviewed_summary
+                
             # Links
-            candidate.parsed_linkedin = parsed_data.get('linkedin')
-            candidate.parsed_github = parsed_data.get('github')
-            candidate.parsed_portfolio = parsed_data.get('portfolio')
-            candidate.parsed_other_links = parsed_data.get('other_links', [])
-            
-            # Skills
-            candidate.parsed_skills = parsed_data.get('skills', [])
-            candidate.parsed_languages = parsed_data.get('languages', [])
-            candidate.parsed_frameworks = parsed_data.get('frameworks', [])
-            candidate.parsed_tools = parsed_data.get('tools', [])
-            
-            # Experience
-            candidate.parsed_experience = parsed_data.get('experience', [])
-            candidate.parsed_total_experience_years = parsed_data.get('total_experience_years')
-            candidate.parsed_current_position = parsed_data.get('current_position')
-            candidate.parsed_current_company = parsed_data.get('current_company')
-            
-            # Education
-            candidate.parsed_education = parsed_data.get('education', [])
-            candidate.parsed_highest_degree = parsed_data.get('highest_degree')
-            candidate.parsed_university = parsed_data.get('university')
-            
-            # Additional
-            candidate.parsed_certifications = parsed_data.get('certifications', [])
-            candidate.parsed_projects = parsed_data.get('projects', [])
-            candidate.parsed_summary = parsed_data.get('summary')
-            candidate.parsed_location = parsed_data.get('location')
-            
-            # Set parsing status
-            if any([
-                candidate.parsed_email,
-                candidate.parsed_skills,
-                candidate.parsed_experience,
-                candidate.parsed_education
-            ]):
-                candidate.parsing_status = 'success'
-            else:
-                candidate.parsing_status = 'partial'
+            reviewed_linkedin = request.data.get('parsed_linkedin')
+            if reviewed_linkedin:
+                parsed_data['parsed_linkedin'] = reviewed_linkedin
+                
+            reviewed_github = request.data.get('parsed_github')
+            if reviewed_github:
+                parsed_data['parsed_github'] = reviewed_github
+                
+            reviewed_portfolio = request.data.get('parsed_portfolio')
+            if reviewed_portfolio:
+                parsed_data['parsed_portfolio'] = reviewed_portfolio
+
+            # Save parsed/reviewed data to candidate
+            for key, value in parsed_data.items():
+                if hasattr(candidate, key):
+                    setattr(candidate, key, value)
             
             candidate.save()
-            print(f"✓ Resume parsed and candidate updated successfully")
+            
+            # Create job application if job_id provided
+            if job_id:
+                from jobs.models import Job, JobApplication
+                from jobs.utils.matching_engine import CandidateJobMatcher
+                
+                try:
+                    job = Job.objects.get(id=job_id)
+                    
+                    # Check if application already exists
+                    application, app_created = JobApplication.objects.get_or_create(
+                        candidate=candidate,
+                        job=job,
+                        defaults={'status': 'applied'}
+                    )
+                    
+                    if not app_created:
+                        return Response(
+                            {'error': 'You have already applied to this job'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    # Calculate match score
+                    try:
+                        matcher = CandidateJobMatcher()
+                        
+                        # Use the CANDIDATE object's data which we just updated
+                        candidate_data = {
+                            'parsed_skills': candidate.parsed_skills or [],
+                            'parsed_experience_years': candidate.parsed_experience_years or 0,
+                            'parsed_education_level': candidate.parsed_education_level or '',
+                            'parsed_location': candidate.parsed_location or '',
+                            'parsed_summary': candidate.parsed_summary or '',
+                        }
+                        
+                        job_data = {
+                            'parsed_required_skills': job.parsed_required_skills or [],
+                            'parsed_preferred_skills': job.parsed_preferred_skills or [],
+                            'parsed_min_experience': job.parsed_min_experience or 0,
+                            'parsed_max_experience': job.parsed_max_experience or 100,
+                            'parsed_education_level': job.parsed_education_level or '',
+                            'parsed_location': job.parsed_location or '',
+                            'parsed_is_remote': job.parsed_is_remote or False,
+                            'parsed_description': job.parsed_description or '',
+                            'parsed_responsibilities': job.parsed_responsibilities or '',
+                        }
+                        
+                        match_result = matcher.calculate_match(candidate_data, job_data)
+                        
+                        application.match_score = match_result['overall_score']
+                        application.match_details = match_result
+                        application.save()
+                    except Exception as match_error:
+                        print(f"Error calculating match: {match_error}")
+                        # Continue even if matching fails
+                    
+                except Job.DoesNotExist:
+                    return Response(
+                        {'error': 'Job not found'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            
+            serializer = CandidateSerializer(candidate)
+            return Response({
+                'message': 'Application submitted successfully!',
+                'candidate': serializer.data
+            }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            # Log error but don't fail the application
-            error_message = str(e)
-            print(f"✗ Resume parsing error for candidate {candidate.id}: {error_message}")
-            candidate.parsing_status = 'failed'
-            candidate.parsing_error = error_message
-            candidate.save()
-        
-        # Return comprehensive response
-        response_serializer = CandidateSerializer(
-            candidate,
-            context={'request': request}
-        )
-        
-        return Response(
-            {
-                'message': 'Application submitted successfully!' if not existing_candidate else 'Application updated successfully!',
-                'candidate': response_serializer.data,
-                'is_update': bool(existing_candidate)
-            },
-            status=status.HTTP_201_CREATED
-        )
-
-
-class CandidateListView(generics.ListAPIView):
-    """
-    GET /api/candidates/
-    List all candidates with key parsed information.
-    """
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateListSerializer
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        
-        # Filter by status
-        status_filter = self.request.query_params.get('status', None)
-        if status_filter:
-            queryset = queryset.filter(application_status=status_filter)
-        
-        # Filter by parsing status
-        parsing_status = self.request.query_params.get('parsing_status', None)
-        if parsing_status:
-            queryset = queryset.filter(parsing_status=parsing_status)
-        
-        return queryset
-
-
-class CandidateDetailView(generics.RetrieveAPIView):
-    """
-    GET /api/candidates/<id>/
-    Retrieve complete candidate information.
-    """
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateSerializer
-    lookup_field = 'id'
-
-
-class CandidateUpdateView(generics.UpdateAPIView):
-    """
-    PUT/PATCH /api/candidates/<id>/
-    Update candidate information.
-    """
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateSerializer
-    lookup_field = 'id'
-    
-    def update(self, request, *args, **kwargs):
-        """
-        Handle candidate update - saves all manual edits.
-        """
-        partial = True
-        instance = self.get_object()
-        
-        print(f"\n{'='*60}")
-        print(f"UPDATING CANDIDATE ID: {instance.id}")
-        print(f"{'='*60}")
-        print(f"Request data received:")
-        for key, value in request.data.items():
-            print(f"  {key}: {value}")
-        print(f"{'='*60}\n")
-        
-        # Get the serializer with data
-        serializer = self.get_serializer(
-            instance,
-            data=request.data,
-            partial=partial
-        )
-        
-        # Validate
-        try:
-            serializer.is_valid(raise_exception=True)
-            print("✓ Validation passed")
-        except Exception as e:
-            print(f"✗ Validation error: {str(e)}")
-            print(f"✗ Errors: {serializer.errors}")
-            raise
-        
-        # Save all the data
-        print("\n→ Saving candidate data...")
-        candidate = serializer.save()
-        
-        print(f"\n{'='*60}")
-        print("DATA SAVED TO DATABASE:")
-        print(f"{'='*60}")
-        print(f"ID: {candidate.id}")
-        print(f"Full Name: {candidate.full_name}")
-        print(f"Email: {candidate.email}")
-        print(f"Phone: {candidate.phone}")
-        print(f"Location: {candidate.parsed_location}")
-        print(f"LinkedIn: {candidate.parsed_linkedin}")
-        print(f"GitHub: {candidate.parsed_github}")
-        print(f"Portfolio: {candidate.parsed_portfolio}")
-        print(f"Current Position: {candidate.parsed_current_position}")
-        print(f"Current Company: {candidate.parsed_current_company}")
-        print(f"Experience Years: {candidate.parsed_total_experience_years}")
-        print(f"Highest Degree: {candidate.parsed_highest_degree}")
-        print(f"University: {candidate.parsed_university}")
-        print(f"Skills: {candidate.parsed_skills}")
-        print(f"Summary: {candidate.parsed_summary[:100] if candidate.parsed_summary else None}...")
-        print(f"{'='*60}\n")
-        
-        # Check if resume was updated
-        resume_updated = 'resume' in request.FILES
-        
-        if resume_updated:
-            print("→ NEW RESUME UPLOADED - Re-parsing...")
-            try:
-                parser = EnhancedResumeParser()
-                resume_path = candidate.resume.path
-                parsed_data = parser.parse(resume_path)
-                
-                # Update all parsed fields from new resume
-                candidate.parsed_text = parsed_data.get('text', '')
-                candidate.parsed_name = parsed_data.get('name')
-                candidate.parsed_email = parsed_data.get('email')
-                candidate.parsed_phone = parsed_data.get('phone')
-                candidate.parsed_linkedin = parsed_data.get('linkedin')
-                candidate.parsed_github = parsed_data.get('github')
-                candidate.parsed_portfolio = parsed_data.get('portfolio')
-                candidate.parsed_other_links = parsed_data.get('other_links', [])
-                candidate.parsed_skills = parsed_data.get('skills', [])
-                candidate.parsed_languages = parsed_data.get('languages', [])
-                candidate.parsed_frameworks = parsed_data.get('frameworks', [])
-                candidate.parsed_tools = parsed_data.get('tools', [])
-                candidate.parsed_experience = parsed_data.get('experience', [])
-                candidate.parsed_total_experience_years = parsed_data.get('total_experience_years')
-                candidate.parsed_current_position = parsed_data.get('current_position')
-                candidate.parsed_current_company = parsed_data.get('current_company')
-                candidate.parsed_education = parsed_data.get('education', [])
-                candidate.parsed_highest_degree = parsed_data.get('highest_degree')
-                candidate.parsed_university = parsed_data.get('university')
-                candidate.parsed_certifications = parsed_data.get('certifications', [])
-                candidate.parsed_projects = parsed_data.get('projects', [])
-                candidate.parsed_summary = parsed_data.get('summary')
-                candidate.parsed_location = parsed_data.get('location')
-                
-                candidate.parsing_status = 'success'
-                candidate.save()
-                print("✓ Resume re-parsed and saved")
-                
-            except Exception as e:
-                print(f"✗ Resume parsing error: {str(e)}")
-                candidate.parsing_status = 'failed'
-                candidate.parsing_error = str(e)
-                candidate.save()
-        else:
-            print("✓ No new resume - manual edits saved")
-        
-        # Refresh from database to ensure we have the latest
-        candidate.refresh_from_db()
-        
-        print(f"\n{'='*60}")
-        print("FINAL DATA AFTER REFRESH:")
-        print(f"{'='*60}")
-        print(f"Full Name: {candidate.full_name}")
-        print(f"Skills: {candidate.parsed_skills}")
-        print(f"Location: {candidate.parsed_location}")
-        print(f"{'='*60}\n")
-        
-        # Return the updated data
-        response_serializer = self.get_serializer(candidate)
-        return Response(response_serializer.data)
-
-
-class CandidateDeleteView(generics.DestroyAPIView):
-    """
-    DELETE /api/candidates/<id>/
-    Delete a candidate record.
-    """
-    queryset = Candidate.objects.all()
-    serializer_class = CandidateSerializer
-    lookup_field = 'id'
-    
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        
-        # Delete resume file from storage
-        if instance.resume:
-            instance.resume.delete(save=False)
-        
-        self.perform_destroy(instance)
-        
-        return Response(
-            {'message': 'Candidate deleted successfully.'},
-            status=status.HTTP_204_NO_CONTENT
-        )
+            print(f"Error in apply endpoint: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'An error occurred: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

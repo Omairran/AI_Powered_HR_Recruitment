@@ -1,297 +1,225 @@
-﻿
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+﻿import React from 'react';
 import './MatchResults.css';
 
-const MatchResults = ({ candidateId, jobId, onClose }) => {
-  const [matchData, setMatchData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const MatchResults = ({ matchData, candidate, job, onClose }) => {
+  if (!matchData) return null;
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
-  useEffect(() => {
-    if (candidateId && jobId) {
-      calculateMatch();
-    }
-  }, [candidateId, jobId]);
-
-  const calculateMatch = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.post(`${API_URL}/matching/calculate/`, {
-        candidate_id: candidateId,
-        job_id: jobId
-      });
-      setMatchData(response.data);
-      setError(null);
-    } catch (err) {
-      console.error('Error calculating match:', err);
-      setError('Failed to calculate match score. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 80) return '#4caf50';
-    if (score >= 60) return '#2196f3';
-    if (score >= 40) return '#ff9800';
-    return '#f44336';
-  };
-
-  const getMatchLevelEmoji = (level) => {
-    if (level.includes('Excellent')) return '🌟';
-    if (level.includes('Great')) return '⭐';
-    if (level.includes('Good')) return '👍';
-    if (level.includes('Fair')) return '👌';
+  const getMatchEmoji = (score) => {
+    if (score >= 90) return '🌟';
+    if (score >= 75) return '⭐';
+    if (score >= 60) return '👍';
+    if (score >= 45) return '👌';
     return '💡';
   };
 
-  if (loading) {
-    return (
-      <div className="match-results-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Calculating AI match score...</p>
-        </div>
-      </div>
-    );
-  }
+  const getMatchColor = (score) => {
+    if (score >= 90) return '#27ae60';
+    if (score >= 75) return '#2ecc71';
+    if (score >= 60) return '#3498db';
+    if (score >= 45) return '#f39c12';
+    return '#e74c3c';
+  };
 
-  if (error) {
-    return (
-      <div className="match-results-container">
-        <div className="error-box">
-          <h3>⚠️ Error</h3>
-          <p>{error}</p>
-          <button onClick={calculateMatch} className="retry-btn">
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!matchData) return null;
-
-  const { candidate, job, match_result } = matchData;
-
-  return (
-    <div className="match-results-container">
-      <div className="match-header">
-        <div className="match-title-section">
-          <h2>
-            {getMatchLevelEmoji(match_result.match_level)} AI Match Analysis
-          </h2>
-          <p className="match-subtitle">
-            {candidate.name} × {job.title}
-          </p>
-        </div>
-        {onClose && (
-          <button className="close-btn" onClick={onClose}>×</button>
-        )}
-      </div>
-
-      {/* Overall Score Card */}
-      <div className="overall-score-card">
-        <div className="score-circle" style={{ 
-          background: `conic-gradient(${getScoreColor(match_result.overall_score)} ${match_result.overall_score * 3.6}deg, #e0e0e0 0deg)` 
-        }}>
-          <div className="score-inner">
-            <div className="score-value">{match_result.overall_score}%</div>
-            <div className="score-label">{match_result.match_level}</div>
-          </div>
-        </div>
-        <div className="score-description">
-          <h3>Overall Compatibility</h3>
-          <p>Based on comprehensive AI analysis of skills, experience, education, and more</p>
-        </div>
-      </div>
-
-      {/* Detailed Scores */}
-      <div className="detailed-scores">
-        <h3>📊 Detailed Score Breakdown</h3>
-        <div className="score-bars">
-          <ScoreBar 
-            label="Skills Match" 
-            score={match_result.skills_score}
-            icon="💻"
-            weight="40%"
-          />
-          <ScoreBar 
-            label="Experience" 
-            score={match_result.experience_score}
-            icon="📈"
-            weight="25%"
-          />
-          <ScoreBar 
-            label="Education" 
-            score={match_result.education_score}
-            icon="🎓"
-            weight="15%"
-          />
-          <ScoreBar 
-            label="Location" 
-            score={match_result.location_score}
-            icon="📍"
-            weight="10%"
-          />
-          <ScoreBar 
-            label="Semantic Match" 
-            score={match_result.semantic_score}
-            icon="🧠"
-            weight="10%"
-          />
-        </div>
-      </div>
-
-      {/* Skills Analysis */}
-      <div className="skills-analysis">
-        <div className="skills-section matched-skills">
-          <h3>✅ Matched Skills ({match_result.matched_skills.length})</h3>
-          <div className="skills-tags">
-            {match_result.matched_skills.length > 0 ? (
-              match_result.matched_skills.map((skill, idx) => (
-                <span key={idx} className="skill-tag matched">{skill}</span>
-              ))
-            ) : (
-              <p className="no-data">No exact skill matches found</p>
-            )}
-          </div>
-        </div>
-
-        {match_result.missing_skills.length > 0 && (
-          <div className="skills-section missing-skills">
-            <h3>❌ Missing Skills ({match_result.missing_skills.length})</h3>
-            <div className="skills-tags">
-              {match_result.missing_skills.map((skill, idx) => (
-                <span key={idx} className="skill-tag missing">{skill}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {match_result.extra_skills.length > 0 && (
-          <div className="skills-section extra-skills">
-            <h3>➕ Additional Skills ({match_result.extra_skills.length})</h3>
-            <div className="skills-tags">
-              {match_result.extra_skills.map((skill, idx) => (
-                <span key={idx} className="skill-tag extra">{skill}</span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Experience Details */}
-      {match_result.experience_details && (
-        <div className="experience-section">
-          <h3>💼 Experience Analysis</h3>
-          <div className="experience-grid">
-            <div className="experience-item">
-              <span className="exp-label">Candidate Experience</span>
-              <span className="exp-value">
-                {match_result.experience_details.candidate_years} years
-              </span>
-            </div>
-            <div className="experience-item">
-              <span className="exp-label">Required Range</span>
-              <span className="exp-value">
-                {match_result.experience_details.required_min}-
-                {match_result.experience_details.required_max} years
-              </span>
-            </div>
-            <div className="experience-item">
-              <span className="exp-label">Status</span>
-              <span className={`exp-value status-${match_result.experience_details.status}`}>
-                {match_result.experience_details.status.replace('_', ' ')}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Strengths */}
-      {match_result.strengths.length > 0 && (
-        <div className="insights-section strengths">
-          <h3>💪 Key Strengths</h3>
-          <ul>
-            {match_result.strengths.map((strength, idx) => (
-              <li key={idx}>{strength}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Weaknesses */}
-      {match_result.weaknesses.length > 0 && (
-        <div className="insights-section weaknesses">
-          <h3>⚠️ Areas of Concern</h3>
-          <ul>
-            {match_result.weaknesses.map((weakness, idx) => (
-              <li key={idx}>{weakness}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Recommendations */}
-      {match_result.recommendations.length > 0 && (
-        <div className="insights-section recommendations">
-          <h3>💡 Recommendations</h3>
-          <ul>
-            {match_result.recommendations.map((rec, idx) => (
-              <li key={idx}>{rec}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Action Buttons */}
-      <div className="match-actions">
-        {match_result.overall_score >= 70 && (
-          <button className="action-btn primary">
-            🎯 Shortlist Candidate
-          </button>
-        )}
-        <button className="action-btn secondary">
-          📧 Send Message
-        </button>
-        <button className="action-btn secondary">
-          📄 View Full Profile
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Score Bar Component
-const ScoreBar = ({ label, score, icon, weight }) => {
-  const getScoreColor = (score) => {
-    if (score >= 80) return '#4caf50';
-    if (score >= 60) return '#2196f3';
-    if (score >= 40) return '#ff9800';
-    return '#f44336';
+  const getScoreBarColor = (score) => {
+    if (score >= 80) return 'var(--success)';
+    if (score >= 60) return 'var(--info)';
+    if (score >= 40) return 'var(--warning)';
+    return 'var(--danger)';
   };
 
   return (
-    <div className="score-bar-container">
-      <div className="score-bar-header">
-        <span className="score-bar-label">
-          {icon} {label}
-        </span>
-        <span className="score-bar-weight">{weight}</span>
-        <span className="score-bar-value">{score.toFixed(1)}%</span>
-      </div>
-      <div className="score-bar-track">
-        <div 
-          className="score-bar-fill"
-          style={{ 
-            width: `${score}%`,
-            backgroundColor: getScoreColor(score)
-          }}
-        />
+    <div className="match-results-modal">
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="match-results-content" onClick={(e) => e.stopPropagation()}>
+          <button className="close-btn" onClick={onClose}>✕</button>
+
+          {/* Header */}
+          <div className="match-header">
+            <div className="match-score-circle" style={{ borderColor: getMatchColor(matchData.overall_score) }}>
+              <span className="score-emoji">{getMatchEmoji(matchData.overall_score)}</span>
+              <span className="score-number">{matchData.overall_score?.toFixed(1)}%</span>
+            </div>
+            <div className="match-title">
+              <h2>{matchData.match_level}</h2>
+              <p className="match-subtitle">
+                {candidate?.name} → {job?.title}
+              </p>
+            </div>
+          </div>
+
+          {/* Score Breakdown */}
+          <div className="scores-section">
+            <h3>📊 Score Breakdown</h3>
+            <div className="score-bars">
+              <div className="score-bar-item">
+                <div className="score-label">
+                  <span>Skills Match</span>
+                  <span className="score-value">{matchData.skills_score?.toFixed(1)}%</span>
+                </div>
+                <div className="score-bar-bg">
+                  <div 
+                    className="score-bar-fill"
+                    style={{ 
+                      width: `${matchData.skills_score}%`,
+                      background: getScoreBarColor(matchData.skills_score)
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="score-bar-item">
+                <div className="score-label">
+                  <span>Experience</span>
+                  <span className="score-value">{matchData.experience_score?.toFixed(1)}%</span>
+                </div>
+                <div className="score-bar-bg">
+                  <div 
+                    className="score-bar-fill"
+                    style={{ 
+                      width: `${matchData.experience_score}%`,
+                      background: getScoreBarColor(matchData.experience_score)
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="score-bar-item">
+                <div className="score-label">
+                  <span>Education</span>
+                  <span className="score-value">{matchData.education_score?.toFixed(1)}%</span>
+                </div>
+                <div className="score-bar-bg">
+                  <div 
+                    className="score-bar-fill"
+                    style={{ 
+                      width: `${matchData.education_score}%`,
+                      background: getScoreBarColor(matchData.education_score)
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="score-bar-item">
+                <div className="score-label">
+                  <span>Location</span>
+                  <span className="score-value">{matchData.location_score?.toFixed(1)}%</span>
+                </div>
+                <div className="score-bar-bg">
+                  <div 
+                    className="score-bar-fill"
+                    style={{ 
+                      width: `${matchData.location_score}%`,
+                      background: getScoreBarColor(matchData.location_score)
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="score-bar-item">
+                <div className="score-label">
+                  <span>Semantic Similarity</span>
+                  <span className="score-value">{matchData.semantic_score?.toFixed(1)}%</span>
+                </div>
+                <div className="score-bar-bg">
+                  <div 
+                    className="score-bar-fill"
+                    style={{ 
+                      width: `${matchData.semantic_score}%`,
+                      background: getScoreBarColor(matchData.semantic_score)
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skills Analysis */}
+          <div className="skills-analysis">
+            <h3>🔧 Skills Analysis</h3>
+            
+            {matchData.matched_skills && matchData.matched_skills.length > 0 && (
+              <div className="skills-group">
+                <h4>✅ Matched Skills ({matchData.matched_skills.length})</h4>
+                <div className="skills-tags">
+                  {matchData.matched_skills.map((skill, idx) => (
+                    <span key={idx} className="skill-tag matched">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {matchData.missing_skills && matchData.missing_skills.length > 0 && (
+              <div className="skills-group">
+                <h4>❌ Missing Skills ({matchData.missing_skills.length})</h4>
+                <div className="skills-tags">
+                  {matchData.missing_skills.map((skill, idx) => (
+                    <span key={idx} className="skill-tag missing">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {matchData.extra_skills && matchData.extra_skills.length > 0 && (
+              <div className="skills-group">
+                <h4>➕ Additional Skills ({matchData.extra_skills.length})</h4>
+                <div className="skills-tags">
+                  {matchData.extra_skills.map((skill, idx) => (
+                    <span key={idx} className="skill-tag extra">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Strengths */}
+          {matchData.strengths && matchData.strengths.length > 0 && (
+            <div className="insights-section">
+              <h3>💪 Strengths</h3>
+              <ul className="insights-list strengths">
+                {matchData.strengths.map((strength, idx) => (
+                  <li key={idx}>{strength}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Weaknesses */}
+          {matchData.weaknesses && matchData.weaknesses.length > 0 && (
+            <div className="insights-section">
+              <h3>⚠️ Areas for Improvement</h3>
+              <ul className="insights-list weaknesses">
+                {matchData.weaknesses.map((weakness, idx) => (
+                  <li key={idx}>{weakness}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {matchData.recommendations && matchData.recommendations.length > 0 && (
+            <div className="insights-section">
+              <h3>💡 Recommendations</h3>
+              <ul className="insights-list recommendations">
+                {matchData.recommendations.map((rec, idx) => (
+                  <li key={idx}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="match-actions">
+            <button className="btn-action btn-shortlist">
+              ⭐ Shortlist Candidate
+            </button>
+            <button className="btn-action btn-interview">
+              📅 Schedule Interview
+            </button>
+            <button className="btn-action btn-reject">
+              ✕ Reject
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

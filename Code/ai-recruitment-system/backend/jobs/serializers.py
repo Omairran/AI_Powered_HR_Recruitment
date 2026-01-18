@@ -3,6 +3,7 @@ from .models import Job, JobApplication
 from candidates.models import Candidate
 from candidates.serializers import CandidateSerializer
 
+
 class JobSerializer(serializers.ModelSerializer):
     """
     Serializer for Job model
@@ -10,113 +11,72 @@ class JobSerializer(serializers.ModelSerializer):
     """
     
     # Read-only computed fields
-    salary_range_display = serializers.ReadOnlyField()
-    experience_range_display = serializers.ReadOnlyField()
-    is_active = serializers.ReadOnlyField()
-    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    applications_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Job
         fields = [
             'id',
-            'job_id',
             'title',
-            'company_name',
-            'department',
-            'description',
-            'responsibilities',
-            'requirements',
-            'nice_to_have',
-            'employment_type',
-            'experience_level',
-            'min_experience_years',
-            'max_experience_years',
+            'company',
             'location',
-            'is_remote',
-            'remote_type',
+            'job_type',
+            'experience_level',
             'salary_min',
             'salary_max',
-            'salary_currency',
-            'salary_period',
+            'description',
+            'requirements',
+            'responsibilities',
+            'benefits',
+            'skills_required',
+            'skills_preferred',
+            'min_experience',
+            'max_experience',
+            'education_level',
+            'is_remote',
+            'application_deadline',
             'parsed_required_skills',
             'parsed_preferred_skills',
-            'parsed_qualifications',
+            'parsed_min_experience',
+            'parsed_max_experience',
+            'parsed_education_level',
+            'parsed_location',
+            'parsed_is_remote',
+            'parsed_description',
             'parsed_responsibilities',
-            'parsed_benefits',
-            'application_deadline',
-            'max_applications',
             'status',
-            'created_by',
-            'created_by_username',
             'created_at',
             'updated_at',
-            'published_at',
-            'view_count',
-            'application_count',
-            'keywords',
-            'salary_range_display',
-            'experience_range_display',
-            'is_active',
+            'applications_count',
         ]
         read_only_fields = [
             'id',
-            'job_id',
             'created_at',
             'updated_at',
-            'published_at',
-            'view_count',
-            'application_count',
+            'parsed_required_skills',
+            'parsed_preferred_skills',
+            'parsed_min_experience',
+            'parsed_max_experience',
+            'parsed_education_level',
+            'parsed_location',
+            'parsed_is_remote',
+            'parsed_description',
+            'parsed_responsibilities',
         ]
     
+    def get_applications_count(self, obj):
+        """Get count of applications for this job"""
+        return obj.applications.count()
+    
     def create(self, validated_data):
-        """Create job with automatic parsing"""
-        from .utils.job_parser import JobDescriptionParser
-        
-        # Parse job description
-        parser = JobDescriptionParser()
-        parsed_data = parser.parse_job_description(
-            description=validated_data.get('description', ''),
-            requirements=validated_data.get('requirements', ''),
-            nice_to_have=validated_data.get('nice_to_have', '')
-        )
-        
-        # Add parsed data to validated_data
-        for key, value in parsed_data.items():
-            if key not in validated_data or not validated_data.get(key):
-                validated_data[key] = value
-        
-        # Create job
+        """Create job - parsing happens in model's save() method"""
         job = Job.objects.create(**validated_data)
         return job
     
     def update(self, instance, validated_data):
-        """Update job and re-parse if description changed"""
-        from .utils.job_parser import JobDescriptionParser
-        
-        # Check if description, requirements, or nice_to_have changed
-        description_changed = (
-            validated_data.get('description') != instance.description or
-            validated_data.get('requirements') != instance.requirements or
-            validated_data.get('nice_to_have') != instance.nice_to_have
-        )
-        
-        # If description changed, re-parse
-        if description_changed:
-            parser = JobDescriptionParser()
-            parsed_data = parser.parse_job_description(
-                description=validated_data.get('description', instance.description),
-                requirements=validated_data.get('requirements', instance.requirements),
-                nice_to_have=validated_data.get('nice_to_have', instance.nice_to_have)
-            )
-            
-            # Update parsed fields
-            for key, value in parsed_data.items():
-                validated_data[key] = value
-        
-        # Update instance
+        """Update job - parsing happens in model's save() method"""
         for key, value in validated_data.items():
             setattr(instance, key, value)
-        
         instance.save()
         return instance
 
@@ -126,33 +86,29 @@ class JobListSerializer(serializers.ModelSerializer):
     Lightweight serializer for job listings
     """
     
-    salary_range_display = serializers.ReadOnlyField()
-    experience_range_display = serializers.ReadOnlyField()
-    is_active = serializers.ReadOnlyField()
+    applications_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Job
         fields = [
             'id',
-            'job_id',
             'title',
-            'company_name',
-            'department',
-            'employment_type',
-            'experience_level',
+            'company',
             'location',
+            'job_type',
+            'experience_level',
+            'salary_min',
+            'salary_max',
             'is_remote',
-            'remote_type',
-            'salary_range_display',
-            'experience_range_display',
             'status',
-            'is_active',
             'application_deadline',
-            'view_count',
-            'application_count',
+            'applications_count',
             'created_at',
-            'published_at',
         ]
+    
+    def get_applications_count(self, obj):
+        """Get count of applications for this job"""
+        return obj.applications.count()
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
@@ -163,7 +119,8 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     # Nested serializers for read operations
     job_details = JobListSerializer(source='job', read_only=True)
     candidate_details = CandidateSerializer(source='candidate', read_only=True)
-    reviewed_by_username = serializers.CharField(source='reviewed_by.username', read_only=True)
+    candidate_name = serializers.CharField(source='candidate.name', read_only=True)
+    job_title = serializers.CharField(source='job.title', read_only=True)
     
     class Meta:
         model = JobApplication
@@ -171,32 +128,23 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             'id',
             'job',
             'job_details',
+            'job_title',
             'candidate',
             'candidate_details',
+            'candidate_name',
             'status',
             'cover_letter',
+            'notes',
             'match_score',
             'match_details',
-            'screening_notes',
-            'screening_score',
-            'interview_date',
-            'interview_notes',
-            'interview_score',
-            'reviewed_by',
-            'reviewed_by_username',
-            'reviewed_at',
             'applied_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'applied_at', 'updated_at', 'reviewed_at']
+        read_only_fields = ['id', 'applied_at', 'updated_at']
     
     def create(self, validated_data):
-        """Create application and increment job application count"""
+        """Create application"""
         application = JobApplication.objects.create(**validated_data)
-        
-        # Increment job application count
-        application.job.increment_application_count()
-        
         return application
 
 
@@ -214,7 +162,7 @@ class JobApplicationCreateSerializer(serializers.Serializer):
         """Validate job exists and is active"""
         try:
             job = Job.objects.get(id=value)
-            if not job.is_active:
+            if job.status != 'active':
                 raise serializers.ValidationError("This job is no longer accepting applications.")
             return value
         except Job.DoesNotExist:
@@ -249,9 +197,6 @@ class JobApplicationCreateSerializer(serializers.Serializer):
             status='applied'
         )
         
-        # Increment job application count
-        application.job.increment_application_count()
-        
         return application
 
 
@@ -264,5 +209,5 @@ class JobStatsSerializer(serializers.Serializer):
     active_jobs = serializers.IntegerField()
     total_applications = serializers.IntegerField()
     avg_applications_per_job = serializers.FloatField()
-    top_viewed_jobs = JobListSerializer(many=True)
-    recent_jobs = JobListSerializer(many=True)
+    top_viewed_jobs = JobListSerializer(many=True, required=False)
+    recent_jobs = JobListSerializer(many=True, required=False)

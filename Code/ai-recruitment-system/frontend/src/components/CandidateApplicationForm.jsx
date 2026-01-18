@@ -1,230 +1,201 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import candidateAPI from '../services/api';
 import './CandidateApplicationForm.css';
 
 const CandidateApplicationForm = () => {
-  // Step 1: Initial form
-  const [formData, setFormData] = useState({
-    full_name: '',
+  const [step, setStep] = useState(1); // 1: Upload, 2: Review, 3: Success
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Form Data
+  const [basicInfo, setBasicInfo] = useState({
+    name: '',
     email: '',
     phone: '',
-    resume: null,
+    job_id: ''
   });
 
-  // Step 2: Parsed data for review/edit
-  const [parsedData, setParsedData] = useState(null);
-  const [editableData, setEditableData] = useState(null);
+  const [resumeFile, setResumeFile] = useState(null);
 
-  // UI state
-  const [step, setStep] = useState(1); // 1: Upload, 2: Review/Edit, 3: Success
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [fileName, setFileName] = useState('');
-  const [candidateId, setCandidateId] = useState(null);
-  const [finalData, setFinalData] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  // Parsed/Review Data
+  const [reviewData, setReviewData] = useState({
+    parsed_skills: [],
+    parsed_experience_years: 0,
+    parsed_education_level: '',
+    parsed_location: '',
+    parsed_summary: '',
+    parsed_linkedin: '',
+    parsed_github: '',
+    parsed_portfolio: ''
+  });
 
-  const API_BASE_URL = 'http://localhost:8000/api/candidates';
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
-  // Step 1: Initial form handlers
-  const handleInputChange = (e) => {
+  const fetchJobs = async () => {
+    try {
+      // We can use direct axios here or add a method to api.js for public jobs
+      // For now using the candidateAPI.getAll if it supports public access or direct fetch
+      // Assuming public endpoint for jobs exists as per previous code
+      const response = await fetch('http://localhost:8000/api/jobs/?status=active');
+      const data = await response.json();
+      setJobs(data);
+    } catch (error) {
+      console.error('Error fetching jobs:', error);
+    }
+  };
+
+  const handleBasicChange = (e) => {
+    setBasicInfo({
+      ...basicInfo,
+      [e.target.name]: e.target.value
+    });
+    setMessage({ text: '', type: '' });
+  };
+
+  const handleReviewChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if (error) setError(null);
+    setReviewData({
+      ...reviewData,
+      [name]: value
+    });
+  };
+
+  const handleSkillsChange = (e) => {
+    // Handle comma-separated input for skills
+    setReviewData({
+      ...reviewData,
+      parsed_skills: e.target.value.split(',').map(s => s.trim()) // Store as array
+    });
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    
     if (file) {
-      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/plain'];
-      const allowedExtensions = ['pdf', 'docx', 'doc', 'txt'];
-      const fileExtension = file.name.split('.').pop().toLowerCase();
-      
-      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-        setError('Please upload a PDF, DOCX, DOC, or TXT file.');
+      // Validate file type
+      const validTypes = ['application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain'];
+
+      if (!validTypes.includes(file.type)) {
+        setMessage({
+          text: 'Please upload a PDF, DOC, DOCX, or TXT file',
+          type: 'error'
+        });
         e.target.value = '';
         return;
       }
 
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        setError('File size must be less than 10MB.');
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setMessage({
+          text: 'File size must be less than 10MB',
+          type: 'error'
+        });
         e.target.value = '';
         return;
       }
 
-      setFormData({ ...formData, resume: file });
-      setFileName(file.name);
-      if (error) setError(null);
+      setResumeFile(file);
+      setMessage({ text: '', type: '' });
     }
   };
 
-  const handleInitialSubmit = async (e) => {
+  const handleNextStep = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setMessage({ text: '', type: '' });
 
-    if (!formData.full_name || !formData.email || !formData.resume) {
-      setError('Please fill in all required fields.');
+    // Validate Step 1
+    if (!basicInfo.name || !basicInfo.email) {
+      setMessage({ text: 'Name and email are required', type: 'error' });
+      setLoading(false);
+      return;
+    }
+    if (!resumeFile) {
+      setMessage({ text: 'Please upload your resume', type: 'error' });
+      setLoading(false);
+      return;
+    }
+    if (!basicInfo.job_id) {
+      setMessage({ text: 'Please select a job', type: 'error' });
       setLoading(false);
       return;
     }
 
-    const submitData = new FormData();
-    submitData.append('full_name', formData.full_name);
-    submitData.append('email', formData.email);
-    if (formData.phone) {
-      submitData.append('phone', formData.phone);
-    }
-    submitData.append('resume', formData.resume);
-
     try {
-      const response = await axios.post(`${API_BASE_URL}/apply/`, submitData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Parse resume
+      const response = await candidateAPI.parseResume(resumeFile);
+      const parsed = response.data;
 
-      const candidate = response.data.candidate;
-      const isUpdate = response.data.is_update;
-      
-      if (isUpdate) {
-        console.log('✓ Updated existing application');
-        setIsUpdating(true);
-      } else {
-        console.log('✓ Created new application');
-        setIsUpdating(false);
-      }
-      
-      setParsedData(candidate);
-      setCandidateId(candidate.id);
-      
-      // Initialize editable data with parsed values
-      setEditableData({
-        full_name: candidate.parsed_name || candidate.full_name,
-        email: candidate.parsed_email || candidate.email,
-        phone: candidate.parsed_phone || candidate.phone || '',
-        location: candidate.parsed_location || '',
-        linkedin: candidate.parsed_linkedin || '',
-        github: candidate.parsed_github || '',
-        portfolio: candidate.parsed_portfolio || '',
-        current_position: candidate.parsed_current_position || '',
-        current_company: candidate.parsed_current_company || '',
-        total_experience_years: candidate.parsed_total_experience_years || '',
-        highest_degree: candidate.parsed_highest_degree || '',
-        university: candidate.parsed_university || '',
-        skills: (candidate.parsed_skills || []).join(', '),
-        summary: candidate.parsed_summary || '',
+      setReviewData({
+        parsed_skills: parsed.parsed_skills || [],
+        parsed_experience_years: parsed.parsed_experience_years || 0,
+        parsed_education_level: parsed.parsed_education_level || '',
+        parsed_location: parsed.parsed_location || '',
+        parsed_summary: parsed.parsed_summary || '',
+        parsed_linkedin: parsed.parsed_linkedin || '',
+        parsed_github: parsed.parsed_github || '',
+        parsed_portfolio: parsed.parsed_portfolio || ''
       });
 
       setStep(2); // Move to review step
-
-    } catch (err) {
-      if (err.response && err.response.data) {
-        const errors = err.response.data;
-        if (typeof errors === 'object') {
-          const errorMessages = Object.entries(errors)
-            .map(([field, messages]) => {
-              if (Array.isArray(messages)) {
-                return `${field}: ${messages.join(', ')}`;
-              }
-              return `${field}: ${messages}`;
-            })
-            .join('\n');
-          setError(errorMessages);
-        } else {
-          setError('An error occurred while submitting your application.');
-        }
-      } else if (err.request) {
-        setError('Unable to connect to the server. Please check your internet connection.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+    } catch (error) {
+      console.error('Error parsing resume:', error);
+      setMessage({
+        text: 'Failed to parse resume. Please try again or use a different file.',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: Review/Edit handlers
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditableData({ ...editableData, [name]: value });
-  };
-
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setMessage({ text: '', type: '' });
 
     try {
-      // Prepare update data with ALL fields
-      const updateData = {
-        full_name: editableData.full_name,
-        email: editableData.email,
-        phone: editableData.phone || '',
-        parsed_location: editableData.location || '',
-        parsed_linkedin: editableData.linkedin || '',
-        parsed_github: editableData.github || '',
-        parsed_portfolio: editableData.portfolio || '',
-        parsed_current_position: editableData.current_position || '',
-        parsed_current_company: editableData.current_company || '',
-        parsed_total_experience_years: editableData.total_experience_years ? parseFloat(editableData.total_experience_years) : null,
-        parsed_highest_degree: editableData.highest_degree || '',
-        parsed_university: editableData.university || '',
-        parsed_skills: editableData.skills ? editableData.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
-        parsed_summary: editableData.summary || '',
-      };
+      const submitData = new FormData();
+      submitData.append('name', basicInfo.name);
+      submitData.append('email', basicInfo.email);
+      submitData.append('phone', basicInfo.phone || '');
+      submitData.append('job_id', basicInfo.job_id);
+      submitData.append('resume', resumeFile);
 
-      console.log('=== SUBMITTING UPDATE ===');
-      console.log('Candidate ID:', candidateId);
-      console.log('Update Data:', updateData);
+      // Append reviewed data
+      // API expects parsed_skills as a list or string. Let's send comma-separated string for simplicity with FormData
+      // or duplicate keys for list.
+      // Based on backend change: if we send a string "A, B", it splits it.
+      submitData.append('parsed_skills', reviewData.parsed_skills.join(', '));
+      submitData.append('parsed_experience_years', reviewData.parsed_experience_years);
+      submitData.append('parsed_education_level', reviewData.parsed_education_level);
+      submitData.append('parsed_location', reviewData.parsed_location);
+      submitData.append('parsed_summary', reviewData.parsed_summary);
 
-      // Send PATCH request
-      const response = await axios.patch(
-        `${API_BASE_URL}/${candidateId}/update/`,
-        updateData,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      // Append links
+      submitData.append('parsed_linkedin', reviewData.parsed_linkedin || '');
+      submitData.append('parsed_github', reviewData.parsed_github || '');
+      submitData.append('parsed_portfolio', reviewData.parsed_portfolio || '');
 
-      console.log('=== UPDATE RESPONSE ===');
-      console.log('Response data:', response.data);
+      await candidateAPI.apply(submitData);
 
-      // Wait a moment for database to commit
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setStep(3); // Success step
+      setMessage({
+        text: '✅ Application submitted successfully!',
+        type: 'success'
+      });
 
-      // Fetch fresh data from server
-      console.log('=== FETCHING LATEST DATA ===');
-      const latestResponse = await axios.get(`${API_BASE_URL}/${candidateId}/`);
-      
-      console.log('=== LATEST DATA FROM SERVER ===');
-      console.log('Full name:', latestResponse.data.full_name);
-      console.log('Email:', latestResponse.data.email);
-      console.log('Skills:', latestResponse.data.parsed_skills);
-      console.log('Location:', latestResponse.data.parsed_location);
-      console.log('Complete data:', latestResponse.data);
-      
-      // Store final data for display
-      setFinalData(latestResponse.data);
-      setStep(3);
-
-    } catch (err) {
-      console.error('=== UPDATE ERROR ===');
-      console.error('Error:', err);
-      console.error('Error response:', err.response?.data);
-      
-      let errorMessage = 'Failed to save your changes. ';
-      if (err.response?.data) {
-        const errors = err.response.data;
-        if (typeof errors === 'object') {
-          errorMessage += Object.entries(errors)
-            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-            .join(' | ');
-        } else {
-          errorMessage += errors;
-        }
-      } else {
-        errorMessage += 'Please check your connection and try again.';
-      }
-      setError(errorMessage);
+      // Reset form eventually if needed
+    } catch (error) {
+      console.error('Submit error:', error);
+      setMessage({
+        text: error.response?.data?.error || 'Failed to submit application',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -232,591 +203,263 @@ const CandidateApplicationForm = () => {
 
   const handleReset = () => {
     setStep(1);
-    setParsedData(null);
-    setEditableData(null);
-    setCandidateId(null);
-    setFinalData(null);
-    setIsUpdating(false);
-    setFormData({
-      full_name: '',
-      email: '',
-      phone: '',
-      resume: null,
+    setBasicInfo({ name: '', email: '', phone: '', job_id: '' });
+    setResumeFile(null);
+    setReviewData({
+      parsed_skills: [],
+      parsed_experience_years: 0,
+      parsed_education_level: '',
+      parsed_location: '',
+      parsed_summary: ''
     });
-    setFileName('');
-    setError(null);
-    
-    const fileInput = document.querySelector('input[type="file"]');
-    if (fileInput) fileInput.value = '';
+    setMessage({ text: '', type: '' });
   };
 
-  return (
-    <div className="application-container-fullscreen">
-      <div className="application-card-fullscreen">
-        {/* Progress Indicator */}
-        <div className="progress-steps">
-          <div className={`step ${step >= 1 ? 'active' : ''}`}>
-            <div className="step-number">1</div>
-            <div className="step-label">Upload</div>
+  // Render Step 1: Upload
+  const renderUploadStep = () => (
+    <form onSubmit={handleNextStep} className="candidate-form">
+      <h3>Step 1: Application Details</h3>
+
+      <div className="form-section">
+        <div className="form-group">
+          <label>Full Name *</label>
+          <input
+            type="text"
+            name="name"
+            value={basicInfo.name}
+            onChange={handleBasicChange}
+            required
+            placeholder="e.g. John Doe"
+          />
+        </div>
+        <div className="form-group">
+          <label>Email *</label>
+          <input
+            type="email"
+            name="email"
+            value={basicInfo.email}
+            onChange={handleBasicChange}
+            required
+            placeholder="e.g. john@example.com"
+          />
+        </div>
+        <div className="form-group">
+          <label>Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={basicInfo.phone}
+            onChange={handleBasicChange}
+            placeholder="e.g. +1 234 567 890"
+          />
+        </div>
+      </div>
+
+      <div className="form-section">
+        <div className="form-group">
+          <label>Select Job Position *</label>
+          <select
+            name="job_id"
+            value={basicInfo.job_id}
+            onChange={handleBasicChange}
+            required
+          >
+            <option value="">-- Select a job --</option>
+            {jobs.map(job => (
+              <option key={job.id} value={job.id}>
+                {job.title} at {job.company}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Upload Resume (PDF/DOCX) *</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,.txt"
+            required
+          />
+          {resumeFile && (
+            <div className="file-info">
+              Selected: {resumeFile.name}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="form-actions">
+        <button type="submit" className="btn-submit" disabled={loading}>
+          {loading ? 'Analyzing Resume...' : 'Next: Review Data ➡️'}
+        </button>
+      </div>
+    </form>
+  );
+
+  // Render Step 2: Review
+  const renderReviewStep = () => (
+    <form onSubmit={handleFinalSubmit} className="candidate-form">
+      <h3>Step 2: Review Extracted Data</h3>
+      <p className="form-hint">
+        Our AI extracted this information from your resume. Please review and edit if necessary to ensure the best match!
+      </p>
+
+      <div className="form-section">
+        <div className="form-group">
+          <label>Skills (Comma separated)</label>
+          <textarea
+            name="parsed_skills"
+            value={reviewData.parsed_skills.join(', ')}
+            onChange={handleSkillsChange}
+            rows="3"
+            placeholder="e.g. Python, React, Team Leadership"
+          />
+          <small>Add or remove skills to improve your match score</small>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label>Years of Experience</label>
+            <input
+              type="number"
+              name="parsed_experience_years"
+              value={reviewData.parsed_experience_years}
+              onChange={handleReviewChange}
+              step="0.5"
+              min="0"
+            />
           </div>
-          <div className="step-line"></div>
-          <div className={`step ${step >= 2 ? 'active' : ''}`}>
-            <div className="step-number">2</div>
-            <div className="step-label">Review</div>
-          </div>
-          <div className="step-line"></div>
-          <div className={`step ${step >= 3 ? 'active' : ''}`}>
-            <div className="step-number">3</div>
-            <div className="step-label">Done</div>
+          <div className="form-group">
+            <label>Education Level</label>
+            <select
+              name="parsed_education_level"
+              value={reviewData.parsed_education_level}
+              onChange={handleReviewChange}
+            >
+              <option value="">None Detected</option>
+              <option value="High School">High School</option>
+              <option value="Associate">Associate</option>
+              <option value="Bachelor">Bachelor</option>
+              <option value="Master">Master</option>
+              <option value="PhD">PhD</option>
+            </select>
           </div>
         </div>
 
-        {/* Step 1: Upload Resume */}
-        {step === 1 && (
-          <>
-            <h1 className="application-title">Job Application</h1>
-            <p className="application-subtitle">Upload your resume and we'll extract your information</p>
+        <div className="form-group">
+          <label>Location</label>
+          <input
+            type="text"
+            name="parsed_location"
+            value={reviewData.parsed_location}
+            onChange={handleReviewChange}
+            placeholder="e.g. New York, NY"
+          />
+        </div>
 
-            {error && (
-              <div className="alert alert-error">
-                <strong>Error:</strong>
-                <pre>{error}</pre>
-              </div>
-            )}
+        <div className="form-group">
+          <label>Professional Summary</label>
+          <textarea
+            name="parsed_summary"
+            value={reviewData.parsed_summary}
+            onChange={handleReviewChange}
+            rows="4"
+          />
+        </div>
 
-            <form onSubmit={handleInitialSubmit} className="application-form">
-              <div className="form-group">
-                <label htmlFor="full_name" className="form-label">
-                  Full Name <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="full_name"
-                  name="full_name"
-                  value={formData.full_name}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="John Doe"
-                  required
-                  disabled={loading}
-                />
-              </div>
+        <div className="form-section">
+          <h4>🔗 Professional Links</h4>
+          <div className="form-group">
+            <label>LinkedIn Profile</label>
+            <input
+              type="url"
+              name="parsed_linkedin"
+              value={reviewData.parsed_linkedin || ''}
+              onChange={handleReviewChange}
+              placeholder="https://linkedin.com/in/..."
+            />
+          </div>
+          <div className="form-group">
+            <label>GitHub Profile</label>
+            <input
+              type="url"
+              name="parsed_github"
+              value={reviewData.parsed_github || ''}
+              onChange={handleReviewChange}
+              placeholder="https://github.com/..."
+            />
+          </div>
+          <div className="form-group">
+            <label>Portfolio / Website</label>
+            <input
+              type="url"
+              name="parsed_portfolio"
+              value={reviewData.parsed_portfolio || ''}
+              onChange={handleReviewChange}
+              placeholder="https://myportfolio.com"
+            />
+          </div>
+        </div>
+      </div>
 
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
-                  Email Address <span className="required">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="john.doe@example.com"
-                  required
-                  disabled={loading}
-                />
-              </div>
+      <div className="form-actions">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setStep(1)}
+          disabled={loading}
+        >
+          ⬅️ Back
+        </button>
+        <button type="submit" className="btn-submit" disabled={loading}>
+          {loading ? 'Submitting...' : '✅ Confirm & Apply'}
+        </button>
+      </div>
+    </form>
+  );
 
-              <div className="form-group">
-                <label htmlFor="phone" className="form-label">
-                  Phone Number <span className="optional">(Optional)</span>
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="+1 (555) 123-4567"
-                  disabled={loading}
-                />
-              </div>
+  // Render Step 3: Success
+  const renderSuccessStep = () => (
+    <div className="success-container">
+      <div className="success-icon">🎉</div>
+      <h2>Application Submitted!</h2>
+      <p>
+        Your application for <strong>{jobs.find(j => j.id == basicInfo.job_id)?.title}</strong> has been received.
+      </p>
+      <div className="match-info">
+        <p>Your profile has been matched against the job requirements based on the data you reviewed.</p>
+      </div>
+      <button className="btn-primary" onClick={handleReset}>
+        Apply for another job
+      </button>
+    </div>
+  );
 
-              <div className="form-group">
-                <label htmlFor="resume" className="form-label">
-                  Resume <span className="required">*</span>
-                </label>
-                <div className="file-input-wrapper">
-                  <input
-                    type="file"
-                    id="resume"
-                    name="resume"
-                    onChange={handleFileChange}
-                    className="form-input-file"
-                    accept=".pdf,.docx,.doc,.txt"
-                    required
-                    disabled={loading}
-                  />
-                  <label htmlFor="resume" className="file-input-label">
-                    {fileName || 'Choose file...'}
-                  </label>
-                </div>
-                <small className="form-help">
-                  Accepted formats: PDF, DOCX, DOC, TXT (Max 10MB)
-                </small>
-              </div>
-
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Processing Resume...
-                  </>
-                ) : (
-                  'Continue →'
-                )}
-              </button>
-            </form>
-          </>
-        )}
-
-        {/* Step 2: Review and Edit */}
-        {step === 2 && editableData && (
-          <>
-            <h1 className="application-title">Review Your Information</h1>
-            <p className="application-subtitle">
-              Please review and correct any information extracted from your resume
-            </p>
-
-            {isUpdating && (
-              <div className="alert alert-info">
-                <strong>📝 Updating Existing Application:</strong> We found your previous application. 
-                You can update your information below.
-              </div>
-            )}
-
-            {parsedData.parsing_status !== 'success' && (
-              <div className="alert alert-warning">
-                <strong>⚠ Partial Extraction:</strong> Some information couldn't be extracted automatically. 
-                Please fill in any missing fields below.
-              </div>
-            )}
-
-            {error && (
-              <div className="alert alert-error">
-                <strong>Error:</strong> {error}
-              </div>
-            )}
-
-            <form onSubmit={handleFinalSubmit} className="edit-form">
-              <div className="form-section">
-                <h3 className="section-heading">📋 Personal Information</h3>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Full Name *</label>
-                    <input
-                      type="text"
-                      name="full_name"
-                      value={editableData.full_name}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Email *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={editableData.email}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={editableData.phone}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Location</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={editableData.location}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="San Francisco, CA"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3 className="section-heading">🔗 Professional Links</h3>
-                
-                <div className="form-group">
-                  <label className="form-label">LinkedIn Profile</label>
-                  <input
-                    type="url"
-                    name="linkedin"
-                    value={editableData.linkedin}
-                    onChange={handleEditChange}
-                    className="form-input"
-                    placeholder="https://linkedin.com/in/yourprofile"
-                  />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">GitHub Profile</label>
-                    <input
-                      type="url"
-                      name="github"
-                      value={editableData.github}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="https://github.com/yourusername"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Portfolio Website</label>
-                    <input
-                      type="url"
-                      name="portfolio"
-                      value={editableData.portfolio}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="https://yourportfolio.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3 className="section-heading">💼 Current Position</h3>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Job Title</label>
-                    <input
-                      type="text"
-                      name="current_position"
-                      value={editableData.current_position}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="Senior Software Engineer"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Company</label>
-                    <input
-                      type="text"
-                      name="current_company"
-                      value={editableData.current_company}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="Tech Company Inc."
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Total Years of Experience</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    name="total_experience_years"
-                    value={editableData.total_experience_years}
-                    onChange={handleEditChange}
-                    className="form-input"
-                    placeholder="5.0"
-                  />
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3 className="section-heading">🎓 Education</h3>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Highest Degree</label>
-                    <input
-                      type="text"
-                      name="highest_degree"
-                      value={editableData.highest_degree}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="Bachelor of Science in Computer Science"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">University/Institution</label>
-                    <input
-                      type="text"
-                      name="university"
-                      value={editableData.university}
-                      onChange={handleEditChange}
-                      className="form-input"
-                      placeholder="Stanford University"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3 className="section-heading">🛠 Skills</h3>
-                
-                <div className="form-group">
-                  <label className="form-label">Technical Skills (comma-separated)</label>
-                  <textarea
-                    name="skills"
-                    value={editableData.skills}
-                    onChange={handleEditChange}
-                    className="form-textarea"
-                    rows="3"
-                    placeholder="Python, JavaScript, React, Django, AWS, Docker"
-                  />
-                  <small className="form-help">
-                    Separate skills with commas
-                  </small>
-                </div>
-              </div>
-
-              <div className="form-section">
-                <h3 className="section-heading">📝 Professional Summary</h3>
-                
-                <div className="form-group">
-                  <label className="form-label">Brief Summary (Optional)</label>
-                  <textarea
-                    name="summary"
-                    value={editableData.summary}
-                    onChange={handleEditChange}
-                    className="form-textarea"
-                    rows="4"
-                    placeholder="Experienced software engineer with expertise in..."
-                  />
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="btn btn-secondary"
-                  disabled={loading}
-                >
-                  ← Back
-                </button>
-                
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <span className="spinner"></span>
-                      Saving...
-                    </>
-                  ) : (
-                    'Submit Application ✓'
-                  )}
-                </button>
-              </div>
-            </form>
-          </>
-        )}
-
-        {/* Step 3: Success with Complete Data Display */}
-        {step === 3 && finalData && (
-          <div className="success-screen-fullwidth">
-            <div className="success-header">
-              <div className="success-icon">✓</div>
-              <h1 className="success-title">Application Submitted Successfully!</h1>
-              <p className="success-message">
-                Thank you for applying! Your application has been received and verified.
-              </p>
-            </div>
-
-            <div className="submission-details">
-              <div className="details-grid">
-                {/* Application Info */}
-                <div className="detail-card highlight">
-                  <h3>📋 Application Details</h3>
-                  <div className="detail-item">
-                    <span className="detail-label">Application ID:</span>
-                    <span className="detail-value">#{finalData.id}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Status:</span>
-                    <span className="status-badge">{finalData.application_status}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Submitted:</span>
-                    <span className="detail-value">{new Date(finalData.created_at).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Personal Information */}
-                <div className="detail-card">
-                  <h3>👤 Personal Information</h3>
-                  <div className="detail-item">
-                    <span className="detail-label">Name:</span>
-                    <span className="detail-value">{finalData.full_name}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Email:</span>
-                    <span className="detail-value">{finalData.email}</span>
-                  </div>
-                  {finalData.phone && (
-                    <div className="detail-item">
-                      <span className="detail-label">Phone:</span>
-                      <span className="detail-value">{finalData.phone}</span>
-                    </div>
-                  )}
-                  {finalData.parsed_location && (
-                    <div className="detail-item">
-                      <span className="detail-label">Location:</span>
-                      <span className="detail-value">{finalData.parsed_location}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Professional Links */}
-                {(finalData.parsed_linkedin || finalData.parsed_github || finalData.parsed_portfolio) && (
-                  <div className="detail-card">
-                    <h3>🔗 Professional Links</h3>
-                    {finalData.parsed_linkedin && (
-                      <div className="detail-item">
-                        <span className="detail-label">LinkedIn:</span>
-                        <a href={finalData.parsed_linkedin} target="_blank" rel="noopener noreferrer" className="detail-link">
-                          View Profile →
-                        </a>
-                      </div>
-                    )}
-                    {finalData.parsed_github && (
-                      <div className="detail-item">
-                        <span className="detail-label">GitHub:</span>
-                        <a href={finalData.parsed_github} target="_blank" rel="noopener noreferrer" className="detail-link">
-                          View Profile →
-                        </a>
-                      </div>
-                    )}
-                    {finalData.parsed_portfolio && (
-                      <div className="detail-item">
-                        <span className="detail-label">Portfolio:</span>
-                        <a href={finalData.parsed_portfolio} target="_blank" rel="noopener noreferrer" className="detail-link">
-                          Visit Website →
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Current Position */}
-                {(finalData.parsed_current_position || finalData.parsed_current_company) && (
-                  <div className="detail-card">
-                    <h3>💼 Current Position</h3>
-                    {finalData.parsed_current_position && (
-                      <div className="detail-item">
-                        <span className="detail-label">Title:</span>
-                        <span className="detail-value">{finalData.parsed_current_position}</span>
-                      </div>
-                    )}
-                    {finalData.parsed_current_company && (
-                      <div className="detail-item">
-                        <span className="detail-label">Company:</span>
-                        <span className="detail-value">{finalData.parsed_current_company}</span>
-                      </div>
-                    )}
-                    {finalData.parsed_total_experience_years && (
-                      <div className="detail-item">
-                        <span className="detail-label">Experience:</span>
-                        <span className="detail-value">{finalData.parsed_total_experience_years} years</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Education */}
-                {(finalData.parsed_highest_degree || finalData.parsed_university) && (
-                  <div className="detail-card">
-                    <h3>🎓 Education</h3>
-                    {finalData.parsed_highest_degree && (
-                      <div className="detail-item">
-                        <span className="detail-label">Degree:</span>
-                        <span className="detail-value">{finalData.parsed_highest_degree}</span>
-                      </div>
-                    )}
-                    {finalData.parsed_university && (
-                      <div className="detail-item">
-                        <span className="detail-label">Institution:</span>
-                        <span className="detail-value">{finalData.parsed_university}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Skills */}
-                {finalData.parsed_skills && finalData.parsed_skills.length > 0 && (
-                  <div className="detail-card full-width">
-                    <h3>🛠 Technical Skills</h3>
-                    <div className="skills-display">
-                      {finalData.parsed_skills.map((skill, idx) => (
-                        <span key={idx} className="skill-badge">{skill}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Summary */}
-                {finalData.parsed_summary && (
-                  <div className="detail-card full-width">
-                    <h3>📝 Professional Summary</h3>
-                    <p className="summary-display">{finalData.parsed_summary}</p>
-                  </div>
-                )}
-
-                {/* Resume File */}
-                <div className="detail-card full-width">
-                  <h3>📄 Uploaded Resume</h3>
-                  <div className="detail-item">
-                    <span className="detail-label">Filename:</span>
-                    <span className="detail-value">{finalData.resume_filename}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Parsing Status:</span>
-                    <span className={`parsing-badge ${finalData.parsing_status}`}>
-                      {finalData.parsing_status === 'success' && '✓ Successfully Parsed'}
-                      {finalData.parsing_status === 'partial' && '⚠ Partially Parsed'}
-                      {finalData.parsing_status === 'failed' && '✗ Parsing Failed'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="success-actions">
-              <p className="next-steps">
-                <strong>What's Next?</strong> Our HR team will review your application and contact you within 3-5 business days.
-              </p>
-              <button onClick={handleReset} className="btn btn-primary">
-                Submit Another Application
-              </button>
-            </div>
+  return (
+    <div className="candidate-form-container">
+      <div className="form-header">
+        <h2>🚀 AI-Powered Application</h2>
+        {step < 3 && (
+          <div className="step-indicator">
+            <span className={`step ${step === 1 ? 'active' : 'completed'}`}>1. Upload</span>
+            <div className="step-line"></div>
+            <span className={`step ${step === 2 ? 'active' : ''}`}>2. Review</span>
+            <div className="step-line"></div>
+            <span className="step">3. Done</span>
           </div>
         )}
       </div>
+
+      {message.text && step !== 3 && (
+        <div className={`message ${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      {step === 1 && renderUploadStep()}
+      {step === 2 && renderReviewStep()}
+      {step === 3 && renderSuccessStep()}
     </div>
   );
 };

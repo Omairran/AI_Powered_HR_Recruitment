@@ -18,11 +18,11 @@ const api = axios.create({
 // Request interceptor (for future auth tokens)
 api.interceptors.request.use(
   (config) => {
-    // Future: Add authentication token here
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Add authentication token here
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -53,6 +53,22 @@ api.interceptors.response.use(
  * Candidate API endpoints
  */
 const candidateAPI = {
+  /**
+   * Parse resume without saving (for review step)
+   * @param {File} resumeFile - Resume file to parse
+   * @returns {Promise} API response with parsed data
+   */
+  parseResume: (resumeFile) => {
+    const formData = new FormData();
+    formData.append('resume', resumeFile);
+    
+    return api.post('/candidates/parse_resume_only/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
   /**
    * Submit a new candidate application
    * @param {FormData} formData - Form data with candidate info and resume

@@ -7,11 +7,11 @@ from rest_framework.routers import DefaultRouter
 from .views import JobViewSet, JobApplicationViewSet
 from .matching_views import MatchingViewSet  # ADD THIS
 
-# Create router for viewsets
+
 router = DefaultRouter()
 router.register(r'jobs', JobViewSet, basename='job')
 router.register(r'job-applications', JobApplicationViewSet, basename='job-application')
-router.register(r'matching', MatchingViewSet, basename='matching')  # ADD THIS
+router.register(r'matching', MatchingViewSet, basename='matching')
 
 urlpatterns = [
     path('', include(router.urls)),

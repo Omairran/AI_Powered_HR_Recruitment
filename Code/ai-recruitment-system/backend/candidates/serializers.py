@@ -2,7 +2,14 @@
 Enhanced serializers with comprehensive resume data fields.
 """
 from rest_framework import serializers
-from .models import Candidate
+from .models import User, Candidate
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'user_type', 'first_name', 'last_name', 'phone', 'company']
+        read_only_fields = ['id']
 
 
 class CandidateSerializer(serializers.ModelSerializer):
@@ -10,6 +17,7 @@ class CandidateSerializer(serializers.ModelSerializer):
     Complete serializer with all parsed resume data.
     All parsed fields are writable for manual updates.
     """
+    user = UserSerializer(read_only=True)
     resume_filename = serializers.SerializerMethodField()
     resume_url = serializers.SerializerMethodField()
     all_contacts = serializers.SerializerMethodField()
@@ -19,7 +27,8 @@ class CandidateSerializer(serializers.ModelSerializer):
         model = Candidate
         fields = [
             'id',
-            'full_name',
+            'user',
+            'name',  # Changed from 'full_name'
             'email',
             'phone',
             'resume',
@@ -46,13 +55,13 @@ class CandidateSerializer(serializers.ModelSerializer):
             
             # Parsed experience - NOW WRITABLE
             'parsed_experience',
-            'parsed_total_experience_years',
+            'parsed_experience_years',  # Changed from 'parsed_total_experience_years'
             'parsed_current_position',
             'parsed_current_company',
             
             # Parsed education - NOW WRITABLE
             'parsed_education',
-            'parsed_highest_degree',
+            'parsed_education_level',  # Changed from 'parsed_highest_degree'
             'parsed_university',
             
             # Parsed additional - NOW WRITABLE
@@ -60,6 +69,10 @@ class CandidateSerializer(serializers.ModelSerializer):
             'parsed_projects',
             'parsed_summary',
             'parsed_location',
+            
+            # Additional profile fields
+            'linkedin_url',
+            'portfolio_url',
             
             # Metadata
             'application_status',
@@ -74,6 +87,7 @@ class CandidateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'user',
             'created_at',
             'updated_at',
             'resume_filename',
@@ -122,7 +136,7 @@ class CandidateSerializer(serializers.ModelSerializer):
         value = value.lower()
         return value
     
-    def validate_parsed_total_experience_years(self, value):
+    def validate_parsed_experience_years(self, value):
         """Validate experience years."""
         if value is not None:
             if value < 0 or value > 70:
@@ -142,15 +156,15 @@ class CandidateListSerializer(serializers.ModelSerializer):
         model = Candidate
         fields = [
             'id',
-            'full_name',
+            'name',  # Changed from 'full_name'
             'email',
             'phone',
             'resume_filename',
             'parsed_name',
             'parsed_current_position',
             'parsed_current_company',
-            'parsed_total_experience_years',
-            'parsed_highest_degree',
+            'parsed_experience_years',  # Changed from 'parsed_total_experience_years'
+            'parsed_education_level',  # Changed from 'parsed_highest_degree'
             'parsed_skills',
             'application_status',
             'parsing_status',
@@ -168,7 +182,7 @@ class CandidateCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
         fields = [
-            'full_name',
+            'name',  # Changed from 'full_name'
             'email',
             'phone',
             'resume',
