@@ -189,6 +189,11 @@ class Candidate(models.Model):
         blank=True,
         help_text="Tools and technologies"
     )
+    parsed_soft_skills = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Soft skills (Communication, Leadership, etc.)"
+    )
     
     # ========================================================================
     # Parsed Resume Data - Experience
@@ -371,6 +376,7 @@ class Candidate(models.Model):
         all_skills.extend(self.parsed_languages)
         all_skills.extend(self.parsed_frameworks)
         all_skills.extend(self.parsed_tools)
+        all_skills.extend(self.parsed_soft_skills)
         return list(set(all_skills))  # Remove duplicates
     
     def get_skills_breakdown(self):
@@ -380,4 +386,5 @@ class Candidate(models.Model):
             'languages': self.parsed_languages,
             'frameworks': self.parsed_frameworks,
             'tools': self.parsed_tools,
+            'soft_skills': self.parsed_soft_skills,
         }

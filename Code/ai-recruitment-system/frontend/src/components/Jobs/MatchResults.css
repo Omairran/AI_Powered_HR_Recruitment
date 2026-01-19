@@ -34,8 +34,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -43,6 +48,7 @@
     opacity: 0;
     transform: translateY(50px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -383,39 +389,247 @@
   background: #5568d3;
 }
 
+/* Quick Contact in Header */
+.candidate-quick-contact {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+/* Tabs */
+.match-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 2px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #95a5a6;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  margin-bottom: -4px;
+}
+
+.tab-btn:hover {
+  color: #667eea;
+}
+
+.tab-btn.active {
+  color: #2c3e50;
+  border-bottom-color: #667eea;
+}
+
+/* Tab Content Animation */
+.fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+/* Profile View Styles */
+.profile-section {
+  margin-bottom: 35px;
+}
+
+.profile-section h3 {
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f2f5;
+  padding-bottom: 10px;
+}
+
+.summary-text {
+  line-height: 1.7;
+  color: #34495e;
+  font-size: 1.05rem;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+/* Links Grid */
+.links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.profile-link span {
+  font-size: 1.4rem;
+}
+
+.profile-link:hover {
+  border-color: #667eea;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-link.linkedin span {
+  color: #0077b5;
+}
+
+.profile-link.github span {
+  color: #333;
+}
+
+.profile-link.portfolio span {
+  color: #e17055;
+}
+
+/* Timeline (Experience & Education) */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 0;
+  width: 3px;
+  background: #e0e0e0;
+  border-radius: 3px;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 25px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -26px;
+  top: 5px;
+  width: 16px;
+  height: 16px;
+  background: #667eea;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #e0e0e0;
+}
+
+.timeline-marker.edu {
+  background: #27ae60;
+}
+
+.timeline-content h4 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #2c3e50;
+}
+
+.timeline-company {
+  display: block;
+  color: #667eea;
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+.timeline-date {
+  display: inline-block;
+  background: #edf2f7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #4a5568;
+  margin-bottom: 8px;
+}
+
+.timeline-desc {
+  color: #4b5563;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+}
+
+/* Skills Categories */
+.skill-category {
+  margin-bottom: 20px;
+}
+
+.skill-category h5 {
+  margin: 0 0 10px 0;
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Profile Grid */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.simple-list {
+  list-style: none;
+  padding: 0;
+}
+
+.simple-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  color: #34495e;
+}
+
+.simple-list li:last-child {
+  border-bottom: none;
+}
+
+.empty-text {
+  color: #95a5a6;
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-  .match-results-content {
-    padding: 30px 20px;
-  }
-
-  .match-header {
+  .match-tabs {
     flex-direction: column;
-    text-align: center;
+    gap: 0;
   }
 
-  .match-score-circle {
-    width: 120px;
-    height: 120px;
+  .tab-btn {
+    text-align: left;
+    padding: 12px;
   }
 
-  .score-emoji {
-    font-size: 2rem;
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
-  .score-number {
-    font-size: 1.5rem;
-  }
-
-  .match-title h2 {
-    font-size: 1.5rem;
-  }
-
-  .match-actions {
+  .candidate-quick-contact {
     flex-direction: column;
-  }
-
-  .btn-action {
-    width: 100%;
+    gap: 5px;
   }
 }

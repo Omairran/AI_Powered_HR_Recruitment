@@ -43,6 +43,15 @@ class EnhancedResumeParser:
         'cassandra', 'dynamodb', 'mariadb', 'sql server', 'mssql', 'firebase',
         'neo4j', 'couchdb', 'influxdb'
     ]
+
+    SOFT_SKILLS = [
+        'communication', 'leadership', 'teamwork', 'problem solving', 'critical thinking',
+        'adaptability', 'flexibility', 'time management', 'interpersonal', 'creativity',
+        'collaboration', 'emotional intelligence', 'negotiation', 'conflict resolution',
+        'decision making', 'mentoring', 'presentation', 'public speaking', 'agile', 'scrum',
+        'project management', 'strategic thinking', 'analytical', 'detail oriented',
+        'self motivated', 'independent', 'work under pressure', 'multitasking'
+    ]
     
     def __init__(self):
         """Initialize parser with spaCy model."""
@@ -189,6 +198,9 @@ class EnhancedResumeParser:
             
             result['skills'] = self.extract_skills(text)
             print(f"    Total skills: {len(result['skills'])} found")
+
+            result['soft_skills'] = self.extract_soft_skills(text)
+            print(f"    Soft skills: {len(result['soft_skills'])} found")
             
             # Experience
             print("\n  → Extracting experience...")
@@ -255,6 +267,7 @@ class EnhancedResumeParser:
             'languages': [],
             'frameworks': [],
             'tools': [],
+            'soft_skills': [],
             'experience': [],
             'total_experience_years': None,
             'current_position': None,
@@ -506,6 +519,18 @@ class EnhancedResumeParser:
         
         return sorted(list(set(found)))
     
+    def extract_soft_skills(self, text: str) -> List[str]:
+        """Extract soft skills."""
+        text_lower = text.lower()
+        found = []
+        
+        for skill in self.SOFT_SKILLS:
+            pattern = r'\b' + re.escape(skill) + r'\b'
+            if re.search(pattern, text_lower):
+                found.append(skill.title())
+        
+        return sorted(list(set(found)))
+
     def extract_skills(self, text: str) -> List[str]:
         """Extract all skills."""
         all_skills = (
@@ -643,7 +668,14 @@ class EnhancedResumeParser:
                 except:
                     pass
             
-            # Fallback: second line
+            # Fallback: look for keywords in the first few lines
+            if not edu_data['institution']:
+                for line in lines[:3]:
+                    if any(kw in line.lower() for kw in ['university', 'college', 'institute', 'school', 'academy', 'politechnic']):
+                        edu_data['institution'] = line.strip()
+                        break
+            
+            # Final Fallback: second line
             if not edu_data['institution'] and len(lines) > 1:
                 edu_data['institution'] = lines[1].strip()
             
@@ -675,11 +707,13 @@ class EnhancedResumeParser:
             return education[0].get('institution')
         return None
     
+        return certs[:10]
+    
     def extract_certifications(self, text: str) -> List[str]:
         """Extract professional certifications."""
         certs = []
         
-        cert_section = self._extract_section(text, ['certification', 'certificate', 'licenses'])
+        cert_section = self._extract_section(text, ['certification', 'certificate', 'licenses', 'courses'])
         
         if not cert_section:
             return certs
@@ -688,12 +722,22 @@ class EnhancedResumeParser:
         
         for line in lines:
             line = line.strip()
-            if len(line) > 10 and not line.endswith(':'):
-                line = re.sub(r'^[•\-\*\d\.\)]+\s*', '', line)
-                if line:
-                    certs.append(line)
+            # Skip short lines or headers
+            if len(line) < 5 or line.endswith(':'):
+                continue
+                
+            # Clean up bullet points
+            cleaned_line = re.sub(r'^[•\-\*\d\.]+\s*', '', line)
+            
+            # Heuristic: Valid certifications usually contain these words or are in a list format
+            valid_indicators = ['certified', 'certificate', 'license', 'diploma', 'award', 'completed', 'course', 'google', 'aws', 'microsoft', 'oracle', 'ibm', 'meta']
+            
+            if len(cleaned_line) > 5:
+                # If it starts with a bullet point in original text (implied by cleanup) or matches keywords
+                if line != cleaned_line or any(ind in cleaned_line.lower() for ind in valid_indicators):
+                    certs.append(cleaned_line)
         
-        return certs[:10]
+        return certs[:15]
     
     def extract_projects(self, text: str) -> List[Dict]:
         """Extract notable projects."""

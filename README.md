@@ -34,3 +34,4 @@ This project proposes an **AI-powered recruitment system** integrating:
 ---
 
 ## 📁 Folder Structure
+

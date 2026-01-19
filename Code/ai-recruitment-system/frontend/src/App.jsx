@@ -7,6 +7,7 @@ import CandidateApplicationForm from './components/CandidateApplicationForm';
 import JobPostingForm from './components/Jobs/JobPostingForm';
 import JobListings from './components/Jobs/JobListings';
 import HRDashboard from './components/Jobs/HRDashboard';
+import CandidateDashboard from './components/CandidateDashboard';
 import './App.css';
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
       setCurrentUser(parsedUser);
       setUserType(parsedUser.user_type);
       setAuthState('authenticated');
-      
+
       // Set axios default authorization header
       axios.defaults.headers.common['Authorization'] = `Token ${token}`;
     }
@@ -40,10 +41,10 @@ function App() {
     setCurrentUser(data.user);
     setUserType(data.user.user_type);
     setAuthState('authenticated');
-    
+
     // Set axios default authorization header
     axios.defaults.headers.common['Authorization'] = `Token ${data.token}`;
-    
+
     // Set default page based on user type
     if (data.user.user_type === 'hr') {
       setCurrentPage('hr-dashboard');
@@ -56,10 +57,10 @@ function App() {
     setCurrentUser(data.user);
     setUserType(data.user.user_type);
     setAuthState('authenticated');
-    
+
     // Set axios default authorization header
     axios.defaults.headers.common['Authorization'] = `Token ${data.token}`;
-    
+
     // Set default page based on user type
     if (data.user.user_type === 'hr') {
       setCurrentPage('post-job');
@@ -73,10 +74,10 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('candidate_profile');
-    
+
     // Clear axios header
     delete axios.defaults.headers.common['Authorization'];
-    
+
     // Reset state
     setAuthState('landing');
     setCurrentUser(null);
@@ -129,20 +130,20 @@ function App() {
             <h2>🚀 AI Recruitment System</h2>
             <p>Welcome, {currentUser?.first_name || currentUser?.username}!</p>
           </div>
-          
+
           <div className="nav-links">
             {/* Candidate Navigation */}
             {userType === 'candidate' && (
               <>
-                <button 
+                <button
                   onClick={() => setCurrentPage('jobs')}
                   className={`nav-btn ${currentPage === 'jobs' ? 'active' : ''}`}
                 >
                   <span className="nav-icon">🔍</span>
                   Browse Jobs
                 </button>
-                
-                <button 
+
+                <button
                   onClick={() => setCurrentPage('apply')}
                   className={`nav-btn ${currentPage === 'apply' ? 'active' : ''}`}
                 >
@@ -155,15 +156,15 @@ function App() {
             {/* HR Navigation */}
             {userType === 'hr' && (
               <>
-                <button 
+                <button
                   onClick={() => setCurrentPage('post-job')}
                   className={`nav-btn ${currentPage === 'post-job' ? 'active' : ''}`}
                 >
                   <span className="nav-icon">📋</span>
                   Post a Job
                 </button>
-                
-                <button 
+
+                <button
                   onClick={() => setCurrentPage('hr-dashboard')}
                   className={`nav-btn ${currentPage === 'hr-dashboard' ? 'active' : ''}`}
                 >
@@ -171,7 +172,7 @@ function App() {
                   Dashboard
                 </button>
 
-                <button 
+                <button
                   onClick={() => setCurrentPage('jobs')}
                   className={`nav-btn ${currentPage === 'jobs' ? 'active' : ''}`}
                 >
@@ -182,7 +183,7 @@ function App() {
             )}
 
             {/* Logout Button */}
-            <button 
+            <button
               onClick={handleLogout}
               className="nav-btn btn-logout"
             >
@@ -195,8 +196,28 @@ function App() {
 
       {/* Page Content */}
       <main className="main-content">
-        {currentPage === 'jobs' && <JobListings />}
-        {currentPage === 'apply' && userType === 'candidate' && <CandidateApplicationForm />}
+        {currentPage === 'jobs' && (
+          <JobListings
+            onApply={(jobId) => {
+              // Store job ID if needed or pass via state/context
+              // For now, simpler to just switch page if the form allows selecting job.
+              // But requirements say "redirect to job application form"
+              localStorage.setItem('selected_job_id', jobId); // Simple way to pass data
+              setCurrentPage('application-form');
+            }}
+          />
+        )}
+        {currentPage === 'dashboard' && userType === 'candidate' && (
+          <CandidateDashboard onNavigate={setCurrentPage} />
+        )}
+        {currentPage === 'application-form' && userType === 'candidate' && (
+          <CandidateApplicationForm />
+        )}
+        {currentPage === 'apply' && userType === 'candidate' && (
+          // Deprecated: "My Applications" now goes to dashboard
+          <CandidateDashboard onNavigate={setCurrentPage} />
+        )}
+
         {currentPage === 'post-job' && userType === 'hr' && <JobPostingForm />}
         {currentPage === 'hr-dashboard' && userType === 'hr' && <HRDashboard />}
       </main>

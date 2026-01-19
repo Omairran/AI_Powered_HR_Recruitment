@@ -79,139 +79,173 @@ const Register = ({ userType, onRegisterSuccess, onBack }) => {
 
   return (
     <div className="register-page">
-      <div className="register-container">
-        <button className="back-button" onClick={onBack}>
-          ← Back
-        </button>
+      <div className="register-split-container">
 
-        <div className="register-header">
-          <div className="register-icon">
-            {userType === 'candidate' ? '👤' : '💼'}
+        {/* Left Panel - Branding */}
+        <div className="register-left-panel">
+          <div className="register-left-content">
+            <div className="panel-icon-circle">
+              {userType === 'candidate' ? '👤' : '💼'}
+            </div>
+            <h1>Join AI Recruitment</h1>
+            <p className="panel-subtitle">
+              {userType === 'candidate'
+                ? 'Unlock your career potential with AI-driven matching.'
+                : 'Find the perfect talent efficiently with smart insights.'}
+            </p>
+
+            <div className="feature-list">
+              <div className="feature-item">
+                <span className="feature-icon">✨</span>
+                <span>Smart Resume Parsing</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🎯</span>
+                <span>Accurate Job Matching</span>
+              </div>
+              <div className="feature-item">
+                <span className="feature-icon">🚀</span>
+                <span>Streamlined Handling</span>
+              </div>
+            </div>
           </div>
-          <h2>
-            {userType === 'candidate' ? 'Candidate Registration' : 'HR Recruiter Registration'}
-          </h2>
-          <p>Create your account to get started</p>
+          <div className="panel-overlay"></div>
         </div>
 
-        {error && (
-          <div className="error-message">
-            ❌ {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="register-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label>First Name *</label>
-              <input
-                type="text"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="John"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Last Name *</label>
-              <input
-                type="text"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Doe"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Username *</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="john_doe"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Email *</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="john@example.com"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+92 300 1234567"
-            />
-          </div>
-
-          {userType === 'hr' && (
-            <div className="form-group">
-              <label>Company Name *</label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                placeholder="Tech Corp Inc."
-                required
-              />
-            </div>
-          )}
-
-          <div className="form-group">
-            <label>Password *</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="At least 6 characters"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Confirm Password *</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn-register" disabled={loading}>
-            {loading ? '⏳ Creating Account...' : '🚀 Create Account'}
+        {/* Right Panel - Form */}
+        <div className="register-right-panel">
+          <button className="back-button" onClick={onBack}>
+            ← Back
           </button>
-        </form>
 
-        <div className="register-footer">
-          <p>
-            Already have an account?{' '}
-            <span className="link" onClick={() => onBack('login')}>
-              Login here
-            </span>
-          </p>
+          <div className="register-form-container">
+            <div className="register-header">
+              <h2>Create Account</h2>
+              <p>{userType === 'candidate' ? 'Candidate Registration' : 'HR Recruiter Registration'}</p>
+            </div>
+
+            {error && (
+              <div className="error-message">
+                ❌ {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="register-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>First Name *</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    placeholder="John"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Last Name *</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    placeholder="Doe"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Username *</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="john_doe"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="john@example.com"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Phone</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+92 300 1234567"
+                />
+              </div>
+
+              {userType === 'hr' && (
+                <div className="form-group">
+                  <label>Company Name *</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    placeholder="Tech Corp Inc."
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Password *</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="******"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Confirm *</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="******"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn-register" disabled={loading}>
+                {loading ? 'Creating...' : 'Create Account'}
+              </button>
+            </form>
+
+            <div className="register-footer">
+              <p>
+                Already have an account?{' '}
+                <span className="link" onClick={() => onBack('login')}>
+                  Login here
+                </span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

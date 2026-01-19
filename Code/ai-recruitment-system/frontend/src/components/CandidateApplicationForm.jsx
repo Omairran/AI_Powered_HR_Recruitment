@@ -32,6 +32,13 @@ const CandidateApplicationForm = () => {
 
   useEffect(() => {
     fetchJobs();
+
+    // Check for pre-selected job from Listings
+    const savedJobId = localStorage.getItem('selected_job_id');
+    if (savedJobId) {
+      setBasicInfo(prev => ({ ...prev, job_id: savedJobId }));
+      localStorage.removeItem('selected_job_id');
+    }
   }, []);
 
   const fetchJobs = async () => {
@@ -141,6 +148,16 @@ const CandidateApplicationForm = () => {
         parsed_portfolio: parsed.parsed_portfolio || ''
       });
 
+      // Update Basic Info with parsed data if available
+      // We only update if the field is empty or if we want to overwrite. 
+      // User expect AI to fill it, so we overwrite.
+      setBasicInfo(prev => ({
+        ...prev,
+        name: parsed.parsed_name || prev.name,
+        email: parsed.parsed_email || prev.email,
+        phone: parsed.parsed_phone || prev.phone
+      }));
+
       setStep(2); // Move to review step
     } catch (error) {
       console.error('Error parsing resume:', error);
@@ -165,6 +182,11 @@ const CandidateApplicationForm = () => {
       submitData.append('phone', basicInfo.phone || '');
       submitData.append('job_id', basicInfo.job_id);
       submitData.append('resume', resumeFile);
+
+      // Append Basic Info (which might have been edited)
+      submitData.append('parsed_name', basicInfo.name);
+      submitData.append('parsed_email', basicInfo.email);
+      submitData.append('parsed_phone', basicInfo.phone || '');
 
       // Append reviewed data
       // API expects parsed_skills as a list or string. Let's send comma-separated string for simplicity with FormData
@@ -300,12 +322,46 @@ const CandidateApplicationForm = () => {
   // Render Step 2: Review
   const renderReviewStep = () => (
     <form onSubmit={handleFinalSubmit} className="candidate-form">
-      <h3>Step 2: Review Extracted Data</h3>
+      <h3>Step 2: Review & Edit Information</h3>
       <p className="form-hint">
-        Our AI extracted this information from your resume. Please review and edit if necessary to ensure the best match!
+        Please review the information extracted from your resume. You can edit any field to ensure accuracy.
       </p>
 
       <div className="form-section">
+        <h4>👤 Contact Details</h4>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Full Name</label>
+            <input
+              type="text"
+              name="name"
+              value={basicInfo.name}
+              onChange={handleBasicChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={basicInfo.email}
+              onChange={handleBasicChange}
+              required
+            />
+          </div>
+        </div>
+        <div className="form-group">
+          <label>Phone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={basicInfo.phone}
+            onChange={handleBasicChange}
+          />
+        </div>
+
+        <h4>📄 Professional Details</h4>
         <div className="form-group">
           <label>Skills (Comma separated)</label>
           <textarea

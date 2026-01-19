@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../../services/api';
 import './JobListings.css';
 
-const JobListings = () => {
+const JobListings = ({ onApply }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -13,20 +13,20 @@ const JobListings = () => {
     search: ''
   });
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
   const fetchJobs = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/jobs/');
-      setJobs(response.data.filter(job => job.status === 'active'));
+      const response = await api.get('/jobs/');
+      setJobs(Array.isArray(response.data) ? response.data.filter(job => job.status === 'active') : []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching jobs:', error);
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
   const handleFilterChange = (e) => {
     setFilters({
@@ -39,7 +39,7 @@ const JobListings = () => {
     const matchesType = !filters.job_type || job.job_type === filters.job_type;
     const matchesLevel = !filters.experience_level || job.experience_level === filters.experience_level;
     const matchesLocation = !filters.location || job.location.toLowerCase().includes(filters.location.toLowerCase());
-    const matchesSearch = !filters.search || 
+    const matchesSearch = !filters.search ||
       job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
       job.company.toLowerCase().includes(filters.search.toLowerCase());
 
@@ -71,6 +71,21 @@ const JobListings = () => {
       'internship': 'Internship'
     };
     return labels[type] || type;
+  };
+
+  // Helper: Ensure skills is always an array
+  const parseSkills = (skills) => {
+    if (!skills) return [];
+    if (Array.isArray(skills)) return skills;
+    if (typeof skills === 'string') {
+      // Try to parse JSON if it looks like a list
+      try {
+        if (skills.startsWith('[')) return JSON.parse(skills);
+      } catch (e) { /* ignore */ }
+      // Fallback: split by comma
+      return skills.split(',').map(s => s.trim());
+    }
+    return [];
   };
 
   if (loading) {
@@ -128,7 +143,7 @@ const JobListings = () => {
         </div>
 
         {(filters.job_type || filters.experience_level || filters.location || filters.search) && (
-          <button 
+          <button
             className="clear-filters"
             onClick={() => setFilters({ job_type: '', experience_level: '', location: '', search: '' })}
           >
@@ -144,48 +159,55 @@ const JobListings = () => {
 
       {/* Job Cards */}
       <div className="jobs-grid">
-        {filteredJobs.map(job => (
-          <div key={job.id} className="job-card" onClick={() => setSelectedJob(job)}>
-            <div className="job-card-header">
-              <div>
-                <h3>{job.title}</h3>
-                <p className="company">{job.company}</p>
+        {filteredJobs.map(job => {
+          const parsedSkills = parseSkills(job.parsed_required_skills || job.skills_required);
+          return (
+            <div key={job.id} className="job-card" onClick={() => setSelectedJob(job)}>
+              <div className="job-card-header">
+                <div>
+                  <h3>{job.title}</h3>
+                  <p className="company">{job.company}</p>
+                </div>
+                {job.is_remote && <span className="remote-badge">🌐 Remote</span>}
               </div>
-              {job.is_remote && <span className="remote-badge">🌐 Remote</span>}
-            </div>
 
-            <div className="job-meta">
-              <span className="meta-item">
-                📍 {job.location}
-              </span>
-              <span className="meta-item">
-                💼 {getJobTypeLabel(job.job_type)}
-              </span>
-              <span className="meta-item">
-                📊 {getExperienceLabel(job.experience_level)}
-              </span>
-            </div>
+              <div className="job-meta">
+                <span className="meta-item">
+                  📍 {job.location}
+                </span>
+                <span className="meta-item">
+                  💼 {getJobTypeLabel(job.job_type)}
+                </span>
+                <span className="meta-item">
+                  📊 {getExperienceLabel(job.experience_level)}
+                </span>
+              </div>
 
-            <div className="job-salary">
-              💰 {formatSalary(job.salary_min, job.salary_max)}
-            </div>
+              <div className="job-salary">
+                💰 {formatSalary(job.salary_min, job.salary_max)}
+              </div>
 
-            {job.parsed_required_skills && job.parsed_required_skills.length > 0 && (
               <div className="job-skills">
-                {job.parsed_required_skills.slice(0, 5).map((skill, idx) => (
+                {parsedSkills.slice(0, 5).map((skill, idx) => (
                   <span key={idx} className="skill-tag">{skill}</span>
                 ))}
-                {job.parsed_required_skills.length > 5 && (
-                  <span className="skill-tag more">+{job.parsed_required_skills.length - 5} more</span>
+                {parsedSkills.length > 5 && (
+                  <span className="skill-tag more">+{parsedSkills.length - 5} more</span>
                 )}
               </div>
-            )}
 
-            <button className="view-details-btn">
-              View Details →
-            </button>
-          </div>
-        ))}
+              <button
+                className="view-details-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onApply(job.id);
+                }}
+              >
+                Apply Now →
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {filteredJobs.length === 0 && (
@@ -230,7 +252,7 @@ const JobListings = () => {
               <div className="modal-section">
                 <h3>🔧 Required Skills</h3>
                 <div className="skills-list">
-                  {selectedJob.parsed_required_skills.map((skill, idx) => (
+                  {parseSkills(selectedJob.parsed_required_skills).map((skill, idx) => (
                     <span key={idx} className="skill-tag-large">{skill}</span>
                   ))}
                 </div>
@@ -241,7 +263,7 @@ const JobListings = () => {
               <div className="modal-section">
                 <h3>⭐ Preferred Skills</h3>
                 <div className="skills-list">
-                  {selectedJob.parsed_preferred_skills.map((skill, idx) => (
+                  {parseSkills(selectedJob.parsed_preferred_skills).map((skill, idx) => (
                     <span key={idx} className="skill-tag-large preferred">{skill}</span>
                   ))}
                 </div>
@@ -270,7 +292,10 @@ const JobListings = () => {
             )}
 
             <div className="modal-actions">
-              <button className="apply-btn">
+              <button
+                className="apply-btn"
+                onClick={() => onApply(selectedJob.id)}
+              >
                 Apply for this Position
               </button>
             </div>

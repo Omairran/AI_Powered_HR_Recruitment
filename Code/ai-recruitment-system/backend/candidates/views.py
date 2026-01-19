@@ -96,6 +96,9 @@ class CandidateViewSet(viewsets.ModelViewSet):
         # Enhanced Parsing Logic
         parsed_data = {
             'parsed_text': text,
+            'parsed_name': self.extract_name(text),
+            'parsed_email': self.extract_email(text),
+            'parsed_phone': self.extract_phone(text),
             'parsed_skills': self.extract_skills(text),
             'parsed_experience_years': self.extract_experience(text),
             'parsed_education_level': self.extract_education(text),
@@ -215,6 +218,26 @@ class CandidateViewSet(viewsets.ModelViewSet):
                 return city.title()
         
         return ''
+
+    def extract_name(self, text):
+        """Extract name (basic fallback)"""
+        # In a real scenario, use spaCy or the parser utility
+        # For now, we'll try to guess based on first lines
+        lines = text.split('\n')
+        for line in lines[:5]:
+            if len(line.strip()) > 3 and len(line.split()) < 4:
+                return line.strip()
+        return ''
+
+    def extract_email(self, text):
+        """Extract email"""
+        match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text)
+        return match.group(0) if match else ''
+
+    def extract_phone(self, text):
+        """Extract phone"""
+        match = re.search(r'(\+?\d{1,3}[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})', text)
+        return match.group(0) if match else ''
     
     @action(detail=False, methods=['post'])
     def parse_resume_only(self, request):
@@ -258,18 +281,48 @@ class CandidateViewSet(viewsets.ModelViewSet):
                 )
             
             # Check if candidate already exists
-            candidate, created = Candidate.objects.get_or_create(
-                email=email,
-                defaults={
-                    'name': name,
-                    'phone': phone,
-                }
-            )
+            candidate = None
+            created = False
             
-            # Update existing candidate
+            # 1. Try to find by authenticated user first
+            if request.user.is_authenticated:
+                try:
+                    candidate = request.user.candidate_profile
+                except Candidate.DoesNotExist:
+                    pass
+            
+            # 2. If not found, try to find by email
+            if not candidate:
+                candidate = Candidate.objects.filter(email=email).first()
+                if candidate:
+                    # If found by email but user is authenticated and this candidate has no user, link them
+                    if request.user.is_authenticated and not candidate.user:
+                        candidate.user = request.user
+                        candidate.save()
+                    elif request.user.is_authenticated and candidate.user != request.user:
+                        # Email belongs to another user?!
+                        return Response(
+                            {'error': 'This email is already associated with another account.'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+
+            # 3. Create if still not found
+            if not candidate:
+                candidate = Candidate.objects.create(
+                    email=email,
+                    name=name,
+                    phone=phone,
+                    user=request.user if request.user.is_authenticated else None
+                )
+                created = True
+            
+            # Update existing candidate basic info
             if not created:
                 candidate.name = name
                 candidate.phone = phone
+                if request.user.is_authenticated and not candidate.user:
+                     candidate.user = request.user
+                candidate.save()
             
             # 1. Handle Resume & Parsing
             parsed_data = {}
@@ -316,6 +369,21 @@ class CandidateViewSet(viewsets.ModelViewSet):
                 
             if reviewed_summary is not None:
                 parsed_data['parsed_summary'] = reviewed_summary
+
+            # Basic Info override if provided in review
+            reviewed_name = request.data.get('parsed_name')
+            reviewed_email = request.data.get('parsed_email')
+            reviewed_phone = request.data.get('parsed_phone')
+            
+            if reviewed_name:
+                candidate.name = reviewed_name
+                candidate.parsed_name = reviewed_name
+            if reviewed_email:
+                candidate.email = reviewed_email # Be careful updating primary email, but user requested
+                candidate.parsed_email = reviewed_email
+            if reviewed_phone:
+                candidate.phone = reviewed_phone
+                candidate.parsed_phone = reviewed_phone
                 
             # Links
             reviewed_linkedin = request.data.get('parsed_linkedin')
