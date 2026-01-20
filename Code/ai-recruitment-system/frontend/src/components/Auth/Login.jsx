@@ -25,7 +25,7 @@ const Login = ({ userType, onLoginSuccess, onBack }) => {
 
     try {
       const response = await axios.post('http://localhost:8000/api/auth/login/', formData);
-      
+
       // Check if user type matches
       if (response.data.user.user_type !== userType) {
         setError(`This account is registered as ${response.data.user.user_type}. Please use the correct login.`);
@@ -104,7 +104,7 @@ const Login = ({ userType, onLoginSuccess, onBack }) => {
           </div>
 
           <button type="submit" className="btn-login" disabled={loading}>
-            {loading ? '⏳ Logging in...' : '🚀 Login'}
+            {loading ? '⏳ Logging in...' : '👤 Login'}
           </button>
         </form>
 

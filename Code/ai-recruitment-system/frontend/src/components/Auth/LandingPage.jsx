@@ -20,7 +20,7 @@ const LandingPage = ({ onNavigate }) => {
 
           {/* Candidate Card */}
           <div className="cta-card candidate-card">
-            <div className="cta-icon">🚀</div>
+            <div className="cta-icon">👤</div>
             <h2>For Candidates</h2>
             <p>
               Upload your resume, get instant AI feedback, and match with your dream jobs automatically.
@@ -45,8 +45,8 @@ const LandingPage = ({ onNavigate }) => {
 
           {/* Recruiter Card */}
           <div className="cta-card recruiter-card">
-            <div className="cta-icon">💎</div>
-            <h2>For Recruiters</h2>
+            <div className="cta-icon">🧑‍💼</div>
+            <h2>For HR</h2>
             <p>
               Post jobs, parse resumes in bulk, and let AI rank the best talent for your company.
             </p>
@@ -61,7 +61,7 @@ const LandingPage = ({ onNavigate }) => {
                 className="btn-secondary"
                 onClick={() => onNavigate('register', 'hr')}
               >
-                Post a Job
+                Create Account
               </button>
             </div>
           </div>

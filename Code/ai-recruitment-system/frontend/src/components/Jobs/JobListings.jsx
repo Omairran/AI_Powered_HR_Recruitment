@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import './JobListings.css';
 
-const JobListings = ({ onApply }) => {
+const JobListings = ({ onApply, userType }) => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -48,8 +48,8 @@ const JobListings = ({ onApply }) => {
 
   const formatSalary = (min, max) => {
     if (!min && !max) return 'Competitive';
-    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-    if (min) return `$${min.toLocaleString()}+`;
+    if (min && max) return `Rs ${min.toLocaleString()} - Rs ${max.toLocaleString()}`;
+    if (min) return `Rs ${min.toLocaleString()}+`;
     return 'Negotiable';
   };
 
@@ -196,15 +196,17 @@ const JobListings = ({ onApply }) => {
                 )}
               </div>
 
-              <button
-                className="view-details-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onApply(job.id);
-                }}
-              >
-                Apply Now →
-              </button>
+              {userType !== 'hr' && (
+                <button
+                  className="view-details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onApply(job.id);
+                  }}
+                >
+                  Apply Now →
+                </button>
+              )}
             </div>
           );
         })}
@@ -292,12 +294,14 @@ const JobListings = ({ onApply }) => {
             )}
 
             <div className="modal-actions">
-              <button
-                className="apply-btn"
-                onClick={() => onApply(selectedJob.id)}
-              >
-                Apply for this Position
-              </button>
+              {userType !== 'hr' && (
+                <button
+                  className="apply-btn"
+                  onClick={() => onApply(selectedJob.id)}
+                >
+                  Apply for this Position
+                </button>
+              )}
             </div>
           </div>
         </div>

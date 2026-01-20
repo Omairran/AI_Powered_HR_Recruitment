@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import './JobPostingForm.css';
 
-const JobPostingForm = ({ onJobCreated }) => {
+const JobPostingForm = ({ onJobCreated, initialData = null, onCancel = null }) => {
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -22,10 +22,28 @@ const JobPostingForm = ({ onJobCreated }) => {
     education_level: '',
     is_remote: false,
     application_deadline: '',
+    status: 'active'
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        // Ensure arrays handling if needed, though API returns strings for some
+        salary_min: initialData.salary_min || '',
+        salary_max: initialData.salary_max || '',
+        min_experience: initialData.min_experience || '',
+        max_experience: initialData.max_experience || '',
+        application_deadline: initialData.application_deadline || '',
+        skills_required: initialData.skills_required || '',
+        skills_preferred: initialData.skills_preferred || '',
+        status: initialData.status || 'active'
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,7 +53,7 @@ const JobPostingForm = ({ onJobCreated }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, forcedStatus = null) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ text: '', type: '' });
@@ -43,57 +61,70 @@ const JobPostingForm = ({ onJobCreated }) => {
     // Prepare payload with proper types
     const payload = { ...formData };
 
-    // Convert empty strings to null for numeric fields
-    const numericFields = ['salary_min', 'salary_max', 'min_experience', 'max_experience'];
-    numericFields.forEach(field => {
+    if (forcedStatus) {
+      payload.status = forcedStatus;
+    }
+
+    // Convert empty strings to null for numeric and optional date fields
+    const nullableFields = ['salary_min', 'salary_max', 'min_experience', 'max_experience', 'application_deadline'];
+    nullableFields.forEach(field => {
       if (payload[field] === '') {
         payload[field] = null;
       }
     });
 
     try {
-      const response = await api.post(
-        '/jobs/',
-        payload
-      );
+      let response;
+      if (initialData && initialData.id) {
+        // Update existing job
+        response = await api.put(`/jobs/${initialData.id}/`, payload);
+        setMessage({
+          text: '✅ Job updated successfully!',
+          type: 'success'
+        });
+      } else {
+        // Create new job
+        response = await api.post('/jobs/', payload);
+        setMessage({
+          text: '✅ Job posted successfully!',
+          type: 'success'
+        });
+      }
 
-      setMessage({
-        text: '✅ Job posted successfully!',
-        type: 'success'
-      });
-
-      // Reset form
-      setFormData({
-        title: '',
-        company: '',
-        location: '',
-        job_type: 'full-time',
-        experience_level: 'mid',
-        salary_min: '',
-        salary_max: '',
-        description: '',
-        requirements: '',
-        responsibilities: '',
-        benefits: '',
-        skills_required: '',
-        skills_preferred: '',
-        min_experience: '',
-        max_experience: '',
-        education_level: '',
-        is_remote: false,
-        application_deadline: '',
-      });
+      if (!initialData) {
+        // Reset form only if creating new
+        setFormData({
+          title: '',
+          company: '',
+          location: '',
+          job_type: 'full-time',
+          experience_level: 'mid',
+          salary_min: '',
+          salary_max: '',
+          description: '',
+          requirements: '',
+          responsibilities: '',
+          benefits: '',
+          skills_required: '',
+          skills_preferred: '',
+          min_experience: '',
+          max_experience: '',
+          education_level: '',
+          is_remote: false,
+          application_deadline: '',
+          status: 'active'
+        });
+      }
 
       if (onJobCreated) {
         onJobCreated(response.data);
       }
 
     } catch (error) {
-      console.error('Error posting job:', error);
-      console.error('Error response:', error.response?.data);
+      console.error('Error saving job:', error);
       const errorMessage = error.response?.data?.error ||
         error.response?.data?.message ||
-        'Error posting job. Please try again.';
+        'Error saving job. Please try again.';
 
       setMessage({
         text: `❌ ${errorMessage}`,
@@ -107,8 +138,8 @@ const JobPostingForm = ({ onJobCreated }) => {
   return (
     <div className="job-posting-container">
       <div className="job-posting-header">
-        <h2>📋 Post a New Job</h2>
-        <p>Fill in the details below to create a job posting</p>
+        <h2>{initialData ? '✏️ Edit Job' : '📋 Post a New Job'}</h2>
+        <p>{initialData ? 'Update job details below' : 'Fill in the details below to create a job posting'}</p>
       </div>
 
       {message.text && (
@@ -117,7 +148,7 @@ const JobPostingForm = ({ onJobCreated }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="job-posting-form">
+      <form className="job-posting-form">
         {/* Basic Information */}
         <div className="form-section">
           <h3>Basic Information</h3>
@@ -370,14 +401,35 @@ const JobPostingForm = ({ onJobCreated }) => {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="form-actions">
+        {/* Submit Buttons */}
+        <div className="form-actions" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+          {onCancel && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={(e) => handleSubmit(e, 'draft')}
+            disabled={loading}
+          >
+            💾 Save as Draft
+          </button>
+
           <button
             type="submit"
             className="btn-submit"
             disabled={loading}
+            onClick={(e) => handleSubmit(e, 'active')}
           >
-            {loading ? '⏳ Posting Job...' : '✅ Post Job'}
+            {loading ? (initialData ? '⏳ Updating...' : '⏳ Posting...') : (initialData ? '✅ Update Job' : '✅ Post Job')}
           </button>
         </div>
       </form>

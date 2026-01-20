@@ -27,8 +27,9 @@ class JobViewSet(viewsets.ModelViewSet):
         queryset = Job.objects.all()
         
         # Filter by status (default to active for public viewing)
+        # Filter by status (default to active for public viewing)
         status_filter = self.request.query_params.get('status', None)
-        if status_filter:
+        if status_filter and status_filter.lower() != 'all':
             queryset = queryset.filter(status=status_filter)
         elif not self.request.user.is_authenticated:
             # Non-authenticated users only see active jobs

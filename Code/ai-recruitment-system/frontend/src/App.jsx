@@ -198,6 +198,7 @@ function App() {
       <main className="main-content">
         {currentPage === 'jobs' && (
           <JobListings
+            userType={userType}
             onApply={(jobId) => {
               // Store job ID if needed or pass via state/context
               // For now, simpler to just switch page if the form allows selecting job.

@@ -1,11 +1,13 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import MatchResults from './MatchResults';
+import JobPostingForm from './JobPostingForm';
 import './HRDashboard.css';
 
 const HRDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [editingJob, setEditingJob] = useState(null);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingApplications, setLoadingApplications] = useState(false);
@@ -16,7 +18,7 @@ const HRDashboard = () => {
   // Define functions before useEffect
   const fetchJobs = async () => {
     try {
-      const response = await api.get('/jobs/');
+      const response = await api.get('/jobs/?status=all'); // Fetch all jobs including drafts
       setJobs(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -57,13 +59,48 @@ const HRDashboard = () => {
   };
 
   const handleJobSelect = (job) => {
+    if (job.status === 'draft') return; // Don't show candidates for draft jobs
     setSelectedJob(job);
     fetchApplications(job.id);
   };
 
   const handleBackToJobs = () => {
     setSelectedJob(null);
+    setEditingJob(null);
     setApplications([]);
+  };
+
+  const handleEditJob = (e, job) => {
+    e.stopPropagation();
+    setEditingJob(job);
+    setSelectedJob(null);
+  };
+
+  const handleDeleteJob = async (e, jobId) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
+      try {
+        await api.delete(`/jobs/${jobId}/`);
+        setJobs(prevJobs => prevJobs.filter(j => j.id !== jobId));
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert('Failed to delete job. Please try again.');
+      }
+    }
+  };
+
+  const toggleJobStatus = async (e, job) => {
+    e.stopPropagation();
+    const newStatus = job.status === 'active' ? 'closed' : 'active';
+    try {
+      await api.patch(`/jobs/${job.id}/`, { status: newStatus });
+      setJobs(prevJobs => prevJobs.map(j =>
+        j.id === job.id ? { ...j, status: newStatus } : j
+      ));
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status.');
+    }
   };
 
   const handleViewMatch = (application) => {
@@ -134,16 +171,18 @@ const HRDashboard = () => {
         <div className="header-left">
           <h2>
             <span className="icon">💼</span>
-            {selectedJob ? `${selectedJob.title} Candidates` : 'Recruitment Dashboard'}
+            {editingJob ? 'Edit Job' : (selectedJob ? `${selectedJob.title} Candidates` : 'Recruitment Dashboard')}
           </h2>
           <p>
-            {selectedJob
-              ? 'Review and manage applications for this role'
-              : `Welcome back! Manage your hiring pipeline.`}
+            {editingJob
+              ? `Editing ${editingJob.title}`
+              : (selectedJob
+                ? 'Review and manage applications for this role'
+                : `Welcome back! Manage your hiring pipeline.`)}
           </p>
         </div>
 
-        {selectedJob && (
+        {(selectedJob || editingJob) && (
           <button className="btn-secondary" onClick={handleBackToJobs}>
             ← Back to All Jobs
           </button>
@@ -178,8 +217,22 @@ const HRDashboard = () => {
       {/* Main Content */}
       <div className="dashboard-main fade-in">
 
+        {/* VIEW 3: EDIT JOB */}
+        {editingJob && (
+          <JobPostingForm
+            initialData={editingJob}
+            onJobCreated={(updatedJob) => {
+              // Update local list and switch back
+              setJobs(prev => prev.map(j => j.id === updatedJob.id ? updatedJob : j));
+              setEditingJob(null);
+              fetchStatistics(); // Refresh stats in case
+            }}
+            onCancel={() => setEditingJob(null)}
+          />
+        )}
+
         {/* VIEW 1: JOB GRID */}
-        {!selectedJob && (
+        {!selectedJob && !editingJob && (
           <>
             {/* Stats Overview */}
             <div className="stats-overview">
@@ -208,7 +261,7 @@ const HRDashboard = () => {
 
             <div className="jobs-section">
               <div className="section-header">
-                <h3>Active Job Openings</h3>
+                <h3>Job Openings</h3>
               </div>
 
               <div className="jobs-grid">
@@ -216,10 +269,13 @@ const HRDashboard = () => {
                   jobs.map(job => {
                     const skills = parseSkills(job.skills_required);
                     return (
-                      <div className="job-card" key={job.id} onClick={() => handleJobSelect(job)}>
+                      <div className={`job-card ${job.status}`} key={job.id} onClick={() => handleJobSelect(job)}>
                         <div className="job-card-header">
-                          <h4>{job.title}</h4>
-                          <span className="job-type">{job.employment_type || 'Full Time'}</span>
+                          <div className="title-section">
+                            <h4>{job.title}</h4>
+                            <span className={`status-pill ${job.status}`}>{job.status || 'active'}</span>
+                          </div>
+                          <span className="job-type">{job.employment_type || job.job_type}</span>
                         </div>
                         <div className="job-card-body">
                           <p className="job-company">{job.company || 'Tech Inc.'}</p>
@@ -232,15 +288,46 @@ const HRDashboard = () => {
                           </div>
                         </div>
                         <div className="job-card-footer">
-                          <span>📅 Posted {new Date(job.created_at).toLocaleDateString()}</span>
-                          <span className="view-link">View Candidates →</span>
+                          <div className="date-display">
+                            <span>📅 {new Date(job.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <div className="job-actions">
+                            <button
+                              className="btn-icon"
+                              title="Edit Job"
+                              onClick={(e) => handleEditJob(e, job)}
+                            >
+                              ✏️
+                            </button>
+                            {job.status !== 'draft' && (
+                              <button
+                                className="btn-icon"
+                                title={job.status === 'active' ? "Close Job" : "Activate Job"}
+                                onClick={(e) => toggleJobStatus(e, job)}
+                              >
+                                {job.status === 'active' ? '🔒' : '🔓'}
+                              </button>
+                            )}
+                            <button
+                              className="btn-icon delete"
+                              title="Delete Job"
+                              onClick={(e) => handleDeleteJob(e, job.id)}
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </div>
+                        {job.status !== 'draft' && (
+                          <div className="view-candidates-link">
+                            View Candidates →
+                          </div>
+                        )}
                       </div>
                     );
                   })
                 ) : (
                   <div className="empty-state">
-                    <p>No active jobs found. Post a job to get started!</p>
+                    <p>No jobs found. Post a job to get started!</p>
                   </div>
                 )}
               </div>
@@ -249,7 +336,7 @@ const HRDashboard = () => {
         )}
 
         {/* VIEW 2: CANDIDATE TABLE (Full Width) */}
-        {selectedJob && (
+        {selectedJob && !editingJob && (
           <div className="candidates-section fade-in">
             <div className="filters-bar">
               <div className="filter-group">
