@@ -266,6 +266,9 @@ class MatchingViewSet(viewsets.ViewSet):
             match_score__isnull=False
         ).count()
         
+        # Count total unique candidates
+        total_candidates = Candidate.objects.count()
+        
         excellent_matches = JobApplication.objects.filter(
             match_score__gte=90
         ).count()
@@ -293,6 +296,8 @@ class MatchingViewSet(viewsets.ViewSet):
         return Response({
             'total_applications': total_applications,
             'matched_applications': matched_applications,
+            'total_candidates': total_candidates,  # ADDED: Total unique candidates
+            'total_matches': matched_applications, # ADDED: Alias for frontend compatibility
             'unmatched_applications': total_applications - matched_applications,
             'match_distribution': {
                 'excellent': excellent_matches,  # 90-100%

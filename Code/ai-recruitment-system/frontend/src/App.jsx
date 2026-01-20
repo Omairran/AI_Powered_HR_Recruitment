@@ -177,7 +177,7 @@ function App() {
                   className={`nav-btn ${currentPage === 'jobs' ? 'active' : ''}`}
                 >
                   <span className="nav-icon">📊</span>
-                  All Jobs
+                  Available Jobs
                 </button>
               </>
             )}

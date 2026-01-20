@@ -77,7 +77,7 @@ const CandidateDashboard = ({ onNavigate }) => {
         // Default to gray if unknown
         const badgeClass = styles[statusKey] || 'badge-gray';
 
-        return <span className={`status-badge Rs{badgeClass}`}>{status || 'Unknown'}</span>;
+        return <span className={`status-badge ${badgeClass}`}>{status || 'Unknown'}</span>;
     };
 
     if (loading) return (
