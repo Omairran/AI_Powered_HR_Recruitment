@@ -20,13 +20,13 @@ const FaceVerification = () => {
 
   // Add this ref to store the current profile image URL
   const profileImageRef = useRef(null);
-  
+
   useEffect(() => {
     const fetchProfileImage = async () => {
       try {
         const response = await axiosInstance.get('job_posting/current-candidate/profile/');
         console.log("Profile response:", response.data);
-        
+
         if (!response.data.profile_image) {
           console.log('please upload image ....');
           setError('Please upload your profile image before proceeding with the interview.');
@@ -38,9 +38,9 @@ const FaceVerification = () => {
         const imageUrl = response.data.profile_image;
         setProfileImage(imageUrl);
         profileImageRef.current = imageUrl;
-        
+
         console.log('Profile image set to:', imageUrl);
-        
+
         // Start camera after profile image is confirmed
         startCamera();
       } catch (err) {
@@ -93,20 +93,20 @@ const FaceVerification = () => {
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
           width: { ideal: 640 },  // Match backend target size
           height: { ideal: 480 }, // Match backend target size
           facingMode: "user",
           frameRate: { ideal: 30 }
-        } 
+        }
       });
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
       setCountdown(3);
-    } catch (err) {
+    } catch {
       setError('Unable to access camera. Please ensure camera permissions are granted.');
       setIsCapturing(false);
     }
@@ -114,45 +114,45 @@ const FaceVerification = () => {
 
   const captureFrame = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    
+
     const currentProfileImage = profileImageRef.current;
     if (!currentProfileImage) {
       setError('Profile image not available. Please refresh and try again.');
       setIsCapturing(false);
       return;
     }
-  
+
     setIsVerifying(true);
-  
+
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     // Set canvas size to match video feed
     canvas.width = 640;  // Match backend target size
     canvas.height = 480; // Match backend target size
-    
+
     // Draw video frame to canvas with proper scaling
     const ctx = canvas.getContext('2d');
     ctx.drawImage(
-      video, 
+      video,
       0, 0, video.videoWidth, video.videoHeight,  // Source dimensions
       0, 0, canvas.width, canvas.height           // Destination dimensions
     );
-  
+
     // Get blob with higher quality
     canvas.toBlob(async (blob) => {
       const formData = new FormData();
       formData.append('ref_image', blob, 'capture.jpg');
       formData.append('target_image', currentProfileImage);
-      
+
       // Ensure we're sending the full URL as it appears in the console
       // formData.append('target_image', currentProfileImage);
-      
+
       console.log("Sending request with:", {
         ref_image: "blob object",
         target_image: currentProfileImage
       });
-      
+
       try {
         const verifyResponse = await axiosInstance.post('confidence_prediction/verify-face/', formData, {
           headers: {
@@ -161,9 +161,9 @@ const FaceVerification = () => {
           // Add timeout to prevent hanging requests
           timeout: 30000
         });
-  
+
         console.log("Verification response:", verifyResponse.data);
-  
+
         if (verifyResponse.data.match) {
           stopCamera(); // Stop camera on success
           setVerificationStatus('success');
@@ -186,7 +186,7 @@ const FaceVerification = () => {
         console.error("Error processing images:", err);
         setVerificationStatus('failed');
         stopCamera(); // Stop camera on error
-        
+
         // Improved error handling
         if (err.response) {
           console.error("Server responded with error:", err.response.data);
@@ -198,7 +198,7 @@ const FaceVerification = () => {
           console.error("Request setup error:", err.message);
           setError('Error preparing request: ' + err.message);
         }
-        
+
         setIsCapturing(false);
       } finally {
         setIsVerifying(false);
@@ -223,7 +223,7 @@ const FaceVerification = () => {
             Please center your face within the frame for verification
           </p>
         </div>
-        
+
         {error && (
           <div className="alert alert-error">
             <div className="alert-icon">⚠️</div>
@@ -264,7 +264,7 @@ const FaceVerification = () => {
                 <div className="verifying-overlay">
                   <Loader2 className="spin" size={48} />
                   <p>Verifying your identity...</p>
-                  <p className="verification-tip">Please don't move until verification is complete</p>
+                  <p className="verification-tip">Please don&apos;t move until verification is complete</p>
                 </div>
               )}
               <div className="camera-frame">

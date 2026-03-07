@@ -23,9 +23,15 @@ from groq import Groq
 import threading
 
 # Initialize the Groq client
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+import os
+from groq import Groq
+
+def get_groq_client():
+    key = os.getenv("GROQ_API_KEY")
+    print("DEBUG KEY:", key)   # temporary debug
+    if not key:
+        raise ValueError("GROQ_API_KEY missing")
+    return Groq(api_key=key)
 
 # Helper function to get interview details from database
 def get_interview_details(job_id, candidate_id):
@@ -96,6 +102,7 @@ def get_intent(response):
     Return exact intent, not its number"""
     try:
         # Generate intent classification
+        client = get_groq_client()
         intent_response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",  # Updated to current Groq model
             messages=[
@@ -129,13 +136,19 @@ def extract_score_and_comment(score_response):
     """
     Extracts the score and comment from the response string.
     """
-    match = re.search(r'(\d+)/10\s*Comment:\s*(.*)', score_response)
-    if match:
-        score = int(match.group(1))  # Extracts the numerical score
-        comment = match.group(2)    # Extracts the comment text
-        return score, comment
-    else:
+    if not score_response or "Not Applicable" in score_response:
         return None, None
+        
+    score_match = re.search(r'(\d+(?:\.\d+)?)\s*/\s*10', score_response)
+    if score_match:
+        score = float(score_match.group(1))
+        # Extract comment
+        comment_match = re.search(r'Comment:\s*(.*)', score_response, re.IGNORECASE | re.DOTALL)
+        comment = comment_match.group(1).strip() if comment_match else "No comment provided."
+        return score, comment
+        
+    # If we couldn't parse it exactly but it's not "Not Applicable", default to 0 to properly penalize
+    return 0, "Format error, scored 0"
 
 def score_answer(question, answer):
     """
@@ -170,6 +183,7 @@ def score_answer(question, answer):
     """
     try:
         # Generate score
+        client = get_groq_client()
         score_response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",  # Updated to current Groq model
             messages=[
@@ -315,6 +329,15 @@ def chatbot_response(request):
     
     # Get user input
     user_input = request.data.get('message', '')
+    
+    # Defensively update global IDs if provided in the chat request
+    req_job_id = request.data.get('job_id')
+    req_candidate_id = request.data.get('candidate_id')
+    if req_job_id:
+        interview_state['current_job_id'] = req_job_id
+    if req_candidate_id:
+        interview_state['current_candidate_id'] = req_candidate_id
+
     print(f"USER INPUT: '{user_input}'")
     
     if not user_input:
@@ -438,7 +461,7 @@ def chatbot_response(request):
                         # Save all changes
                         application.save()
                         print("=" * 80)
-                        print("✅ APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
+                        print("APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
                         print(f"Interview Status: {application.interview_status}")
                         print(f"Marks: {application.marks}")
                         print(f"Flag Status: {application.flag_status}")
@@ -447,18 +470,18 @@ def chatbot_response(request):
 
                     except ApplicationTable.DoesNotExist:
                         print("=" * 80)
-                        print("❌ ERROR: Application not found in database")
+                        print("ERROR: Application not found in database")
                         print(f"Searched for: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
                         print("=" * 80)
                     except Exception as e:
                         print("=" * 80)
-                        print(f"❌ ERROR updating application: {e}")
+                        print(f"ERROR updating application: {e}")
                         import traceback
                         traceback.print_exc()
                         print("=" * 80)
             else:
                 print("=" * 80)
-                print("⚠️ WARNING: No questions were scored, not updating database")
+                print("WARNING: No questions were scored, not updating database")
                 print("=" * 80)
         
         # Start the verification in a background thread
@@ -490,13 +513,13 @@ def chatbot_response(request):
                 numeric_score = float(score)
                 interview_state["total_score"] += numeric_score
                 interview_state["total_questions"] += 1
-                print(f"✅ Score added: {score}/10 - {comment}")
-                print(f"📊 Running total: {interview_state['total_score']}/{interview_state['total_questions']*10}")
+                print(f"Score added: {score}/10 - {comment}")
+                print(f"Running total: {interview_state['total_score']}/{interview_state['total_questions']*10}")
             except (ValueError, TypeError) as e:
-                print(f"⚠️ Score parsing failed: {e}")
+                print(f"Score parsing failed: {e}")
                 print(f"Score was: {score_result}")
         else:
-            print(f"⚠️ Score was None, result was: {score_result}")
+            print(f"Score was None, result was: {score_result}")
         
         # Log the interview details
         interview_log_entry = {
@@ -513,6 +536,7 @@ def chatbot_response(request):
         interview_state["is_intro_phase"] = False  # End intro phase after first response
 
     # Generate the assistant's response
+    client = get_groq_client()
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",  # Updated to current Groq model
         messages=interview_state["messages"],
@@ -632,7 +656,7 @@ def chatbot_response(request):
 
                         application.save()
                         print("=" * 80)
-                        print("✅ APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
+                        print("APPLICATION SUCCESSFULLY UPDATED IN DATABASE")
                         print(f"Interview Status: {application.interview_status}")
                         print(f"Marks: {application.marks}")
                         print(f"Flag Status: {application.flag_status}")
@@ -641,18 +665,18 @@ def chatbot_response(request):
 
                     except ApplicationTable.DoesNotExist:
                         print("=" * 80)
-                        print("❌ ERROR: Application not found in database")
+                        print("ERROR: Application not found in database")
                         print(f"Searched for: job_id={interview_state['current_job_id']}, candidate_id={interview_state['current_candidate_id']}")
                         print("=" * 80)
                     except Exception as e:
                         print("=" * 80)
-                        print(f"❌ ERROR updating application: {e}")
+                        print(f"ERROR updating application: {e}")
                         import traceback
                         traceback.print_exc()
                         print("=" * 80)
             else:
                 print("=" * 80)
-                print("⚠️ WARNING: No questions were scored, not updating database")
+                print("WARNING: No questions were scored, not updating database")
                 print("=" * 80)
         
         thread = threading.Thread(target=run_face_verification, daemon=True)

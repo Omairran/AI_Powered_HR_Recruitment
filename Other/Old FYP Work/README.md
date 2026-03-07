@@ -58,24 +58,8 @@ Ensure you have the following installed:
 - cd Backend
 - python -m venv venv
 - venv\Scripts\Activate
-- pip install Django
-- pip install djangorestframework-simplejwt
-- pip install djangorestframework
-- pip install social-auth-app-Django
-- pip install django-filter
-- pip install google-auth google-auth-oauthlib google-auth-httplib2
-- pip install huggingface_hub
-- pip install transformers accelerate sentencepiece
-- pip install groq
-- pip install numpy
-- pip install opencv-python
-- pip install tensorflow==2.20
-- pip install tf-keras
-- pip install deepface
-- python.exe -m pip install --upgrade pip
-- pip install django-cors-headers
-- pip install drf-yasg
-- pip install pillow
+
+- pip install -r requirements.txt
 - python manage.py migrate
 - python manage.py runserver
 
@@ -89,7 +73,7 @@ Ensure you have the following installed:
 ### **Admin Dashboard**
 ---
 - http://127.0.0.1:8000/admin/
-- username:  omair
+- username:  rana
 - Password:  namal123
 
 - python manage.py createsuperuser

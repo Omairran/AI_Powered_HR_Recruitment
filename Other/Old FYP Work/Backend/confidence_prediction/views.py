@@ -8,6 +8,7 @@ import numpy as np
 from mtcnn import MTCNN
 from deepface import DeepFace
 import os
+import urllib.parse
 from django.conf import settings
 import logging
 
@@ -58,7 +59,7 @@ class FaceVerificationView(APIView):
             if '/media/' in image_url:
                 media_index = image_url.find('/media/')
                 if media_index >= 0:
-                    path_after_media = image_url[media_index + 7:]
+                    path_after_media = urllib.parse.unquote(image_url[media_index + 7:])
                     absolute_path = os.path.join(settings.MEDIA_ROOT, path_after_media)
                     
                     if not os.path.exists(absolute_path):
@@ -273,7 +274,7 @@ class FaceVerificationCheat(APIView):
             if '/media/' in image_url:
                 media_index = image_url.find('/media/')
                 if media_index >= 0:
-                    path_after_media = image_url[media_index + 7:]
+                    path_after_media = urllib.parse.unquote(image_url[media_index + 7:])
                     absolute_path = os.path.join(settings.MEDIA_ROOT, path_after_media)
                     return absolute_path if os.path.exists(absolute_path) else False
             return False

@@ -604,11 +604,8 @@ class CandidateAppliedJobsView(generics.ListAPIView):
         data = []
         for job in queryset:
             application = ApplicationTable.objects.filter(
-                candidate__candidate=request.user,
-                job=job,
-                interview_status=False  # Only include applications where interview_status=False
-
-            ).first()
+                job=job
+            ).order_by('-applied_at').first()
             # If there is no valid application, skip this job
             if not application:
                 continue

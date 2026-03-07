@@ -96,8 +96,8 @@ const CandidateAppliedJobs = () => {
     <div className="page-container">
       <div className="content-wrapper">
         <div className="page-header">
-          <button 
-            className="btn btn-secondary" 
+          <button
+            className="btn btn-secondary"
             onClick={() => navigate('/candidate-dashboard')}
           >
             <ArrowLeft size={16} /> Back
@@ -141,8 +141,8 @@ const CandidateAppliedJobs = () => {
                       <h4 className="section-title">Required Skills</h4>
                       <div className="tags-container">
                         {Array.isArray(job.skills) && job.skills.map((skill, index) => (
-                          <span 
-                            key={index} 
+                          <span
+                            key={index}
                             className="tag skill-tag"
                             style={{ display: 'inline-block' }}
                           >
@@ -163,13 +163,33 @@ const CandidateAppliedJobs = () => {
                     </div>
 
                     <div className="button-group">
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleStartInterview(job)}
-                        style={{ position: 'relative' }}
-                      >
-                        Start Interview
-                      </button>
+                      {job.interview_status ? (
+                        <div className="w-full">
+                          <div className="text-sm text-gray-600 mb-2">
+                            <strong>Interview Status:</strong> Completed
+                          </div>
+                          {job.marks && (
+                            <div className="text-sm text-blue-600 font-bold mb-2">
+                              <strong>Score:</strong> {job.marks}
+                            </div>
+                          )}
+                          <button
+                            className="btn btn-secondary w-full"
+                            style={{ position: 'relative', opacity: 0.7, cursor: 'not-allowed' }}
+                            disabled
+                          >
+                            Interview Completed
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => handleStartInterview(job)}
+                          style={{ position: 'relative' }}
+                        >
+                          Start Interview
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -182,7 +202,7 @@ const CandidateAppliedJobs = () => {
           )}
         </div>
       </div>
-      
+
       <InterviewAlert
         open={showDialog}
         onClose={() => setShowDialog(false)}

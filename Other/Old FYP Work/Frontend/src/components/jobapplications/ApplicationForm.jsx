@@ -3,7 +3,7 @@ import "../../styles/ApplicationForm.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope, faGraduationCap, faFileUpload, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from 'react-router-dom';
-import CustomAlert from '../alerts/CustomAlert';
+
 
 function ApplicationForm() {
   const { state } = useLocation();
@@ -16,7 +16,7 @@ function ApplicationForm() {
   });
   const [resumeFile, setResumeFile] = useState(null);
   const navigate = useNavigate();
-  
+
   // Error state
   const [error, setError] = useState({
     show: false,
@@ -83,14 +83,14 @@ function ApplicationForm() {
           navigate("/publicposts");
         }, 2000);
       } else {
-        const errorData = await response.json();
+        await response.json();
         setError({
           show: true,
-          message: "You can't apply more than one time for a single job" || "An error occurred while submitting the application.",
+          message: "You can't apply more than one time for a single job",
           type: "error"
         });
       }
-    } catch (error) {
+    } catch {
       setError({
         show: true,
         message: "An error occurred while submitting the application.",
@@ -176,7 +176,7 @@ function ApplicationForm() {
                 <button type="button" className="cancel-button">Cancel</button>
                 <button type="submit" className="apply-button">Apply Now</button>
               </div>
-              
+
               {error.show && (
                 <div className={`message-container ${error.type}`}>
                   {error.message}
@@ -190,6 +190,7 @@ function ApplicationForm() {
             </div>
           </form>
 
+          {/* eslint-disable-next-line react/no-unknown-property */}
           <style jsx>{`
             .form-footer {
               display: flex;
