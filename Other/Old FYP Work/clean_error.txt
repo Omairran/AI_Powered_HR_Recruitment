@@ -1,0 +1,141 @@
+git : remote: error: 
+GH013: Repository rule 
+violations found for 
+refs/heads/main.       
+ 
+At line:1 char:1
++ git push origin main 
+> push_error.txt 2>&1; 
+type push_error.txt
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (remote: error   
+ : ...s/main.          
+  :String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö     
+   
+remote:     Resolve 
+the following 
+violations before 
+pushing again        
+remote: 
+remote:     - Push 
+cannot contain secrets 
+       
+remote: 
+remote:             
+remote:      (?) Learn 
+how to resolve a 
+blocked push        
+remote:      https://do
+cs.github.com/code-secu
+rity/secret-scanning/wo
+rking-with-secret-scann
+ing-and-push-protection
+/working-with-push-prot
+ection-from-the-command
+-line#resolving-a-block
+ed-push        
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+Groq API Key ΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇö        
+remote:        
+locations:        
+remote:          - 
+commit: 8ab814dbb97c0a9
+e00483d7531c09cd08aac81
+b5        
+remote:            
+path: Other/Old FYP 
+Work/API.txt:1        
+remote:          - 
+commit: 8ab814dbb97c0a9
+e00483d7531c09cd08aac81
+b5        
+remote:            
+path: Other/Old FYP 
+Work/API.txt:3        
+remote:             
+remote:        (?) To 
+push, remove secret 
+from commit(s) or 
+follow this URL to 
+allow the secret.      
+  
+remote:        https://
+github.com/Omairran/AI_
+Powered_HR_Recruitment/
+security/secret-scannin
+g/unblock-secret/3AdGwV
+FwiYfAru6GZRfxwZHrs7B  
+      
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+Groq API Key ΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇö        
+remote:        
+locations:        
+remote:          - 
+commit: 8ab814dbb97c0a9
+e00483d7531c09cd08aac81
+b5        
+remote:            
+path: Other/Old FYP 
+Work/Backend/.env:1    
+    
+remote:             
+remote:        (?) To 
+push, remove secret 
+from commit(s) or 
+follow this URL to 
+allow the secret.      
+  
+remote:        https://
+github.com/Omairran/AI_
+Powered_HR_Recruitment/
+security/secret-scannin
+g/unblock-secret/3AdGwV
+oHvD34R4uy5eovqTckkTa  
+      
+remote:             
+remote: 
+remote: 
+To https://github.com/O
+mairran/AI_Powered_HR_R
+ecruitment.git
+ ! [remote rejected]   
+  main -> main (push 
+declined due to 
+repository rule 
+violations)
+error: failed to push 
+some refs to 'https://g
+ithub.com/Omairran/AI_P
+owered_HR_Recruitment.g
+it'

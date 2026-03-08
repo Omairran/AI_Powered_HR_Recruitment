@@ -3654,3 +3654,34 @@ HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200
 HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
  Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}]
  Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170905_938834.jpg', 'verified': False}]
+From D:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+Watching for file changes with StatReloader
+From D:\AI_Powered_HR_Recruitment\Other\Old FYP Work\Backend\venv\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170905_938834.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170905_938834.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170910_904182.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170905_938834.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170910_904182.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170915_905479.jpg', 'verified': False}]
+ Face Verification Results: [{'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170850_903093.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170855_887154.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170900_925379.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170905_938834.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170910_904182.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170915_905479.jpg', 'verified': False}, {'frame_url': '/media/interview_frames_job_87_candidate_54_frame_20260301_170920_892774.jpg', 'verified': False}]
